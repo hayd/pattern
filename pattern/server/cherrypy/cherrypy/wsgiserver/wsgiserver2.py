@@ -67,6 +67,8 @@ number of requests and their responses, so we run a nested loop::
                 if req.close_connection:
                     return
 """
+from __future__ import division
+from functools import reduce
 
 __all__ = ['HTTPRequest', 'HTTPConnection', 'HTTPServer',
            'SizeCheckWrapper', 'KnownLengthRFile', 'ChunkedRFile',
@@ -304,8 +306,8 @@ class SizeCheckWrapper(object):
         self._check_length()
         return data
 
-    def next(self):
-        data = self.rfile.next()
+    def __next__(self):
+        data = next(self.rfile)
         self.bytes_read += len(data)
         self._check_length()
         return data

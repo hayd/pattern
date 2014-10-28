@@ -1,3 +1,5 @@
+from __future__ import division
+from __future__ import print_function
 # -*- coding: utf-8 -*-
 from util import *
 
@@ -456,7 +458,7 @@ class TestModel(unittest.TestCase):
             self.assertAlmostEqual(v1, 1.00, places=2)
             self.assertAlmostEqual(v2, 0.00, places=2)
             self.model.lsa = None
-        except ImportError, e:
+        except ImportError as e:
             pass
         print("pattern.vector.Model.similarity()")
         
@@ -526,7 +528,7 @@ class TestModel(unittest.TestCase):
         # Assert Model.reduce() LSA reduction.
         try:
             import numpy
-        except ImportError, e:
+        except ImportError as e:
             return
         self.model.reduce(2)
         self.assertTrue(isinstance(self.model.lsa, vector.LSA))
@@ -652,7 +654,7 @@ class TestLSA(unittest.TestCase):
     def test_lsa(self):
         try:
             import numpy
-        except ImportError, e:
+        except ImportError as e:
             print(e)
             return
         # Assert LSA properties.
@@ -896,9 +898,9 @@ class TestClassifier(unittest.TestCase):
         # Assert untrained classifier returns None.
         v = Classifier(**kwargs)
         self.assertEqual(v.classify("herring"), None)
-        print("pattern.vector.%s.train()"    % Classifier.__name__)
-        print("pattern.vector.%s.classify()" % Classifier.__name__)
-        print("pattern.vector.%s.save()"     % Classifier.__name__)
+        print(("pattern.vector.%s.train()"    % Classifier.__name__))
+        print(("pattern.vector.%s.classify()" % Classifier.__name__))
+        print(("pattern.vector.%s.save()"     % Classifier.__name__))
     
     def test_classifier_vector(self):
         # Assert Classifier._vector() (translates input from train() and classify() to a Vector).
@@ -953,7 +955,7 @@ class TestClassifier(unittest.TestCase):
     def test_svm(self):
         try:
             from pattern.vector import svm
-        except ImportError, e:
+        except ImportError as e:
             print(e)
             return
         # Assert support vector classification.
@@ -970,7 +972,7 @@ class TestClassifier(unittest.TestCase):
         # assert that it is used for linear SVC (= 10x faster).
         try:
             from pattern.vector import svm
-        except ImportError, e:
+        except ImportError as e:
             print(e)
             return
         if svm.LIBLINEAR:

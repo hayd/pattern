@@ -181,6 +181,7 @@ To format statistics reports:
     See 'Reporting', above.
 
 """
+from __future__ import division
 
 # -------------------------------- Statistics -------------------------------- #
 
@@ -269,8 +270,8 @@ class ByteCountWrapper(object):
     def __iter__(self):
         return self
 
-    def next(self):
-        data = self.rfile.next()
+    def __next__(self):
+        data = next(self.rfile)
         self.bytes_read += len(data)
         return data
 

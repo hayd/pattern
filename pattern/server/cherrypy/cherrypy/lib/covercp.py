@@ -19,6 +19,7 @@ Run your code, then use the ``covercp.serve()`` function to browse the
 results in a web browser. If you run this module from the command line,
 it will call ``serve()`` for you.
 """
+from __future__ import division
 
 import re
 import sys

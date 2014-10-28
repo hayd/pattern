@@ -1,3 +1,5 @@
+from __future__ import division
+from __future__ import print_function
 #### PATTERN | TEXT | PARSER #######################################################################
 # -*- coding: utf-8 -*-
 # Copyright (c) 2010 University of Antwerp, Belgium
@@ -113,11 +115,11 @@ def pprint(string, token=[WORD, POS, CHUNK, PNP], column=4):
         Alternatively, you can supply a tree.Text or tree.Sentence object.
     """
     if isinstance(string, basestring):
-        print("\n\n".join([table(sentence, fill=column) for sentence in Text(string, token)]))
+        print(("\n\n".join([table(sentence, fill=column) for sentence in Text(string, token)])))
     if isinstance(string, Text):
-        print("\n\n".join([table(sentence, fill=column) for sentence in string]))
+        print(("\n\n".join([table(sentence, fill=column) for sentence in string])))
     if isinstance(string, Sentence):
-        print(table(string, fill=column))
+        print((table(string, fill=column)))
 
 #--- LAZY DICTIONARY -------------------------------------------------------------------------------
 # A lazy dictionary is empty until one of its methods is called.
@@ -230,7 +232,7 @@ class lazyset(set):
         """ If the list is empty, calls lazylist.load().
             Replaces lazylist.method() with list.method() and calls it.
         """
-        print "!"
+        print("!")
         if set.__len__(self) == 0:
             self.load()
             setattr(self, method, types.MethodType(getattr(set, method), self))
@@ -1562,7 +1564,7 @@ def commandline(parse=Parser().parse):
         # The output can be either slash-formatted string or XML.
         if "xml" in arguments:
             s = Tree(s, s.tags).xml
-        print(encode_utf8(s))
+        print((encode_utf8(s)))
 
 #### VERBS #########################################################################################
 

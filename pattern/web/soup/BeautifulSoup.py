@@ -77,6 +77,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE, DAMMIT.
 
 """
 from __future__ import generators
+from __future__ import print_function
 
 __author__ = "Leonard Richardson (leonardr@segfault.org)"
 __version__ = "3.2.1"
@@ -177,7 +178,7 @@ class PageElement(object):
         #this element (and any children) hadn't been parsed. Connect
         #the two.
         lastChild = self._lastRecursiveChild()
-        nextElement = lastChild.next
+        nextElement = lastChild.__next__
 
         if self.previous:
             self.previous.next = nextElement
@@ -256,7 +257,7 @@ class PageElement(object):
                 newChild.nextSibling.previousSibling = newChild
             newChildsLastElement.next = nextChild
 
-        if newChildsLastElement.next:
+        if newChildsLastElement.__next__:
             newChildsLastElement.next.previous = newChildsLastElement
         self.contents.insert(position, newChild)
 
@@ -370,7 +371,7 @@ class PageElement(object):
         g = generator()
         while True:
             try:
-                i = g.next()
+                i = next(g)
             except StopIteration:
                 break
             if i:
@@ -386,7 +387,7 @@ class PageElement(object):
     def nextGenerator(self):
         i = self
         while i is not None:
-            i = i.next
+            i = i.__next__
             yield i
 
     def nextSiblingGenerator(self):
@@ -555,10 +556,10 @@ class Tag(PageElement):
         self.escapeUnrecognizedEntities = parser.escapeUnrecognizedEntities
 
         # Convert any HTML, XML, or numeric entities in the attribute values.
-        convert = lambda(k, val): (k,
+        convert = lambda k_val: (k_val[0],
                                    re.sub("&(#\d+|#x[0-9a-fA-F]+|\w+);",
                                           self._convertEntities,
-                                          val))
+                                          k_val[1]))
         self.attrs = map(convert, self.attrs)
 
     def getString(self):
@@ -576,13 +577,13 @@ class Tag(PageElement):
     def getText(self, separator=u""):
         if not len(self.contents):
             return u""
-        stopNode = self._lastRecursiveChild().next
+        stopNode = self._lastRecursiveChild().__next__
         strings = []
         current = self.contents[0]
         while current is not stopNode:
             if isinstance(current, NavigableString):
                 strings.append(current.strip())
-            current = current.next
+            current = current.__next__
         return separator.join(strings)
 
     text = property(getText)
@@ -605,7 +606,7 @@ class Tag(PageElement):
         raise ValueError("Tag.index: element not in tag")
 
     def has_key(self, key):
-        return self._getAttrMap().has_key(key)
+        return key in self._getAttrMap()
 
     def __getitem__(self, key):
         """tag[key] returns the value of the 'key' attribute for the tag,
@@ -649,14 +650,14 @@ class Tag(PageElement):
                 #We don't break because bad HTML can define the same
                 #attribute multiple times.
             self._getAttrMap()
-            if self.attrMap.has_key(key):
+            if key in self.attrMap:
                 del self.attrMap[key]
 
     def __call__(self, *args, **kwargs):
         """Calling a tag like a function is the same as calling its
         findAll() method. Eg. tag('a') returns a list of all the A tags
         found within this tag."""
-        return apply(self.findAll, args, kwargs)
+        return self.findAll(*args, **kwargs)
 
     def __getattr__(self, tag):
         #print "Getattr %s.%s" % (self.__class__, tag)
@@ -785,7 +786,7 @@ class Tag(PageElement):
             return
         current = self.contents[0]
         while current is not None:
-            next = current.next
+            next = current.__next__
             if isinstance(current, Tag):
                 del current.contents[:]
             current.parent = None
@@ -878,11 +879,11 @@ class Tag(PageElement):
     def recursiveChildGenerator(self):
         if not len(self.contents):
             raise StopIteration
-        stopNode = self._lastRecursiveChild().next
+        stopNode = self._lastRecursiveChild().__next__
         current = self.contents[0]
         while current is not stopNode:
             yield current
-            current = current.next
+            current = current.__next__
 
 
 # Next, a couple classes to represent queries and their results.
@@ -995,7 +996,7 @@ class SoupStrainer:
             elif hasattr(matchAgainst, '__iter__'): # list-like
                 result = markup in matchAgainst
             elif hasattr(matchAgainst, 'items'):
-                result = markup.has_key(matchAgainst)
+                result = matchAgainst in markup
             elif matchAgainst and isinstance(markup, basestring):
                 if isinstance(markup, unicode):
                     matchAgainst = unicode(matchAgainst)
@@ -1208,8 +1209,8 @@ class BeautifulStoneSoup(Tag, SGMLParser):
     def isSelfClosingTag(self, name):
         """Returns true iff the given string is the name of a
         self-closing tag according to this parser."""
-        return self.SELF_CLOSING_TAGS.has_key(name) \
-               or self.instanceSelfClosingTags.has_key(name)
+        return name in self.SELF_CLOSING_TAGS \
+               or name in self.instanceSelfClosingTags
 
     def reset(self):
         Tag.__init__(self, self, self.ROOT_TAG_NAME)
@@ -1301,7 +1302,7 @@ class BeautifulStoneSoup(Tag, SGMLParser):
 
         nestingResetTriggers = self.NESTABLE_TAGS.get(name)
         isNestable = nestingResetTriggers != None
-        isResetNesting = self.RESET_NESTING_TAGS.has_key(name)
+        isResetNesting = name in self.RESET_NESTING_TAGS
         popTo = None
         inclusive = True
         for i in range(len(self.tagStack)-1, 0, -1):
@@ -1314,7 +1315,7 @@ class BeautifulStoneSoup(Tag, SGMLParser):
             if (nestingResetTriggers is not None
                 and p.name in nestingResetTriggers) \
                 or (nestingResetTriggers is None and isResetNesting
-                    and self.RESET_NESTING_TAGS.has_key(p.name)):
+                    and p.name in self.RESET_NESTING_TAGS):
 
                 #If we encounter one of the nesting reset triggers
                 #peculiar to this tag, or we encounter another tag
@@ -1516,7 +1517,7 @@ class BeautifulSoup(BeautifulStoneSoup):
     BeautifulStoneSoup before writing your own subclass."""
 
     def __init__(self, *args, **kwargs):
-        if not kwargs.has_key('smartQuotesTo'):
+        if 'smartQuotesTo' not in kwargs:
             kwargs['smartQuotesTo'] = self.HTML_ENTITIES
         kwargs['isHTML'] = True
         BeautifulStoneSoup.__init__(self, *args, **kwargs)
@@ -1699,7 +1700,7 @@ class BeautifulSOAP(BeautifulStoneSoup):
             parent._getAttrMap()
             if (isinstance(tag, Tag) and len(tag.contents) == 1 and
                 isinstance(tag.contents[0], NavigableString) and
-                not parent.attrMap.has_key(tag.name)):
+                tag.name not in parent.attrMap):
                 parent[tag.name] = tag.contents[0]
         BeautifulStoneSoup.popTag(self)
 
@@ -1824,7 +1825,7 @@ class UnicodeDammit:
                                                       "iso-8859-1",
                                                       "iso-8859-2"):
             markup = re.compile("([\x80-\x9f])").sub \
-                     (lambda(x): self._subMSChar(x.group(1)),
+                     (lambda x: self._subMSChar(x.group(1)),
                       markup)
 
         try:
@@ -2014,4 +2015,4 @@ class UnicodeDammit:
 if __name__ == '__main__':
     import sys
     soup = BeautifulSoup(sys.stdin)
-    print soup.prettify()
+    print(soup.prettify())

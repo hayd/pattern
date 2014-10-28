@@ -1,3 +1,4 @@
+from __future__ import division
 #### PATTERN | EN | QUANTIFY #######################################################################
 # Copyright (c) 2010 University of Antwerp, Belgium
 # Author: Tom De Smedt <tom@organisms.be>

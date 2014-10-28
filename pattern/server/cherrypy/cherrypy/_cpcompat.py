@@ -325,7 +325,7 @@ try:
 except NameError:
     # Python 2
     def next(i):
-        return i.next()
+        return i.__next__()
 
 if sys.version_info >= (3,3):
     Timer = threading.Timer

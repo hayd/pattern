@@ -469,7 +469,7 @@ class Entity(object):
             raise StopIteration
         return line
 
-    def next(self):
+    def __next__(self):
         return self.__next__()
 
     def read_into_file(self, fp_out=None):

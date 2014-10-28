@@ -1,3 +1,5 @@
+from __future__ import division
+from __future__ import print_function
 #### PATTERN | DB ##################################################################################
 # -*- coding: utf-8 -*-
 # Copyright (c) 2010 University of Antwerp, Belgium
@@ -685,7 +687,7 @@ class Database(object):
         """
         def __init__(self, cursor):
             self._cursor = cursor
-        def next(self):
+        def __next__(self):
             return next(self.__iter__())
         def __iter__(self):
             for row in (hasattr(self._cursor, "__iter__") and self._cursor or self._cursor.fetchall()):
@@ -2625,4 +2627,4 @@ def pprint(datasheet, truncate=40, padding=" ", fill="."):
                 s += ((k==0 or len(lines[k]) > 0) and fill or " ") * (w[j] - len(lines[k])) 
                 s += padding
                 columns.append(s)
-            print(" ".join(columns))
+            print((" ".join(columns)))

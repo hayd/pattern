@@ -1,3 +1,5 @@
+from __future__ import division
+from __future__ import print_function
 # -*- coding: utf-8 -*-
 # These tests require a working internet connection.
 from util import *
@@ -209,7 +211,7 @@ class TestURL(unittest.TestCase):
         # Assert URL redirected URL (this depends on where you are).
         # In Belgium, it yields "http://www.google.be/".
         v = web.URL(self.live).redirect
-        print("pattern.web.URL.redirect: " + self.live + " => " + str(v))
+        print(("pattern.web.URL.redirect: " + self.live + " => " + str(v)))
 
     def test_abs(self):
         # Assert absolute URL (special attention for anchors).
@@ -505,7 +507,7 @@ class TestSearchEngine(unittest.TestCase):
             # self.assertEqual(v2, None)
         # Assert SearchEngineTypeError for unknown type.
         self.assertRaises(web.SearchEngineTypeError, e.search, query, type="crystall-ball")
-        print("pattern.web.%s.search()" % api)
+        print(("pattern.web.%s.search()" % api))
     
     def test_search_google(self):
         self._test_search_engine("Google",       *self.api["Google"])
@@ -560,7 +562,7 @@ class TestSearchEngine(unittest.TestCase):
         self.assertTrue(i2 >= baseline[1]) # query in url + title + description
         self.assertTrue(i3 >= baseline[2]) # language "en"
         self.assertTrue(i4 >= baseline[3]) # url's ending with "jpg", "png" or "gif"
-        print("pattern.web.%s.Result(type=%s)" % (api, type.upper()))
+        print(("pattern.web.%s.Result(type=%s)" % (api, type.upper())))
     
     def test_results_google(self):
         self._test_results("Google",   *self.api["Google"])
@@ -626,7 +628,7 @@ class TestSearchEngine(unittest.TestCase):
             except web.HTTP403Forbidden:
                 raise unittest.SkipTest("FIXME")
             self.assertEqual(web.URL(v[0].url).exists, True)
-            print("pattern.web.%s.search(type=IMAGE, size=%s)" % (api, size.upper()))
+            print(("pattern.web.%s.search(type=IMAGE, size=%s)" % (api, size.upper())))
 
     def test_yahoo_image_size(self):
         self._test_search_image_size("Yahoo",  *self.api["Yahoo"])
@@ -639,7 +641,7 @@ class TestSearchEngine(unittest.TestCase):
         # Assert WikipediaArticle.list(), an iterator over all article titles.
         source, license, Engine = self.api["Wikipedia"]
         v = Engine(license).list(start="a", count=1)
-        v = [v.next() for i in range(2)]
+        v = [next(v) for i in range(2)]
         self.assertTrue(len(v) == 2)
         self.assertTrue(v[0].lower().startswith("a"))
         self.assertTrue(v[1].lower().startswith("a"))
@@ -649,7 +651,7 @@ class TestSearchEngine(unittest.TestCase):
         # Assert WikipediaArticle.all(), an iterator over WikipediaArticle objects.
         source, license, Engine = self.api["Wikipedia"]
         v = Engine(license).all(start="a", count=1)
-        v = [v.next() for i in range(1)]
+        v = [next(v) for i in range(1)]
         self.assertTrue(len(v) == 1)
         self.assertTrue(isinstance(v[0], web.WikipediaArticle))
         self.assertTrue(v[0].title.lower().startswith("a"))
@@ -767,7 +769,7 @@ class TestDOM(unittest.TestCase):
         self.assertEqual(v1.source[:10], "<!doctype ") # Note: BeautifulSoup strips whitespace.
         self.assertEqual(v1.parent, None)
         # Assert Node traversal.
-        v2 = v1.children[0].next
+        v2 = v1.children[0].__next__
         self.assertEqual(v2.type, web.TEXT)
         self.assertEqual(v2.previous, v1.children[0])
         # Assert Document properties.
@@ -958,7 +960,7 @@ class TestMail(unittest.TestCase):
         # Assert web.imap.Mail.
         m = web.Mail(self.username, self.password, service=self.service, port=self.port, secure=self.SSL)
         # Assert web.imap.MailFolder (assuming GMail folders).
-        print(m.folders)
+        print((m.folders))
         self.assertTrue(len(m.folders) > 0)
         self.assertTrue(len(m.inbox) > 0)
         print("pattern.web.Mail")
@@ -996,7 +998,7 @@ class TestMail(unittest.TestCase):
                 if len(e.attachments) > 0:
                     self.assertTrue(isinstance(e.attachments[0][1], str))
                     self.assertTrue(len(e.attachments[0][1]) > 0)
-                    print("pattern.web.Message.attachments (MIME-type: %s)" % e.attachments[0][0])
+                    print(("pattern.web.Message.attachments (MIME-type: %s)" % e.attachments[0][0]))
         print("pattern.web.Mail.search(field=SUBJECT)")
         print("pattern.web.Mail.read()")
 

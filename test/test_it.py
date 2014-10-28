@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import division
 from __future__ import print_function
 from future.builtins import range
-# -*- coding: utf-8 -*-
+
 from util import *
 
 from pattern import it

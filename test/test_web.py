@@ -1,9 +1,10 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import division
 from __future__ import print_function
 from future.builtins import next
 from future.builtins import str
 from future.builtins import range
-# -*- coding: utf-8 -*-
 # These tests require a working internet connection.
 from util import *
 

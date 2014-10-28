@@ -1,4 +1,3 @@
-from future.builtins import range
 #### PATTERN | DE | INFLECT ########################################################################
 # -*- coding: utf-8 -*-
 # Copyright (c) 2012 University of Antwerp, Belgium
@@ -19,6 +18,8 @@ from future.builtins import range
 # 87% for Verbs.find_lemma()
 # 87% for Verbs.find_lexeme()
 # 98% for predicative
+
+from future.builtins import range
 
 import os
 import sys

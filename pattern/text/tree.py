@@ -1,9 +1,3 @@
-from future.builtins import filter
-from future.builtins import map
-from future.builtins import zip
-from future.builtins import str
-from future.builtins import range
-from future.builtins import object
 #### PATTERN | EN | PARSE TREE #####################################################################
 # Copyright (c) 2010 University of Antwerp, Belgium
 # Author: Tom De Smedt <tom@organisms.be>
@@ -36,6 +30,13 @@ from future.builtins import object
 
 # The Text and Sentece classes are containers: 
 # no parsing functionality should be added to it.
+
+from future.builtins import filter
+from future.builtins import map
+from future.builtins import zip
+from future.builtins import str
+from future.builtins import range
+from future.builtins import object
 
 try:
     from itertools import chain

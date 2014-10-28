@@ -1,3 +1,13 @@
+#### PATTERN | WEB #################################################################################
+# -*- coding: utf-8 -*-
+# Copyright (c) 2010 University of Antwerp, Belgium
+# Author: Tom De Smedt <tom@organisms.be>
+# License: BSD (see LICENSE.txt for details).
+# http://www.clips.ua.ac.be/pages/pattern
+
+####################################################################################################
+# Python API interface for various web services (Google, Twitter, Wikipedia, ...)
+
 from __future__ import division
 from __future__ import absolute_import
 from future.builtins import zip
@@ -10,15 +20,6 @@ from future import standard_library
 standard_library.install_hooks()
 from future.builtins import range
 from future.builtins import object
-#### PATTERN | WEB #################################################################################
-# -*- coding: utf-8 -*-
-# Copyright (c) 2010 University of Antwerp, Belgium
-# Author: Tom De Smedt <tom@organisms.be>
-# License: BSD (see LICENSE.txt for details).
-# http://www.clips.ua.ac.be/pages/pattern
-
-####################################################################################################
-# Python API interface for various web services (Google, Twitter, Wikipedia, ...)
 
 # smgllib.py is removed from Python 3, a warning is issued in Python 2.6+. Ignore for now.
 import warnings; warnings.filterwarnings(action='ignore', category=DeprecationWarning, module="sgmllib")
@@ -27,7 +28,8 @@ import os
 import sys
 import threading
 import time
-import socket, future.standard_library.urllib.parse as urllib_parse, urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse, ssl
+import socket
+import future.standard_library.urllib.parse as urllib_parse, urllib.request, urllib.error, urllib.request, urllib.error, ssl
 import base64
 import future.standard_library.html.entities as html_entities
 import future.standard_library.http.client as http_client
@@ -274,8 +276,8 @@ def urldecode(query):
     if query:
         query = query.lstrip("?").split("&")
         query = ((kv.split("=") + [None])[:2] for kv in query)
-        query = ((u(urllib.parse.unquote_plus(bytestring(k))),
-          _format(u(urllib.parse.unquote_plus(bytestring(v))))) for k, v in query if k != "")
+        query = ((u(urllib_parse.unquote_plus(bytestring(k))),
+          _format(u(urllib_parse.unquote_plus(bytestring(v))))) for k, v in query if k != "")
         return dict(query)
     return {}
 
@@ -417,7 +419,7 @@ class URL(object):
         """
         s = list(self.parts[QUERY].items())
         s = dict((bytestring(k), bytestring(v if v is not None else "")) for k, v in s)
-        s = urllib.parse.urlencode(s)
+        s = urllib_parse.urlencode(s)
         return s
 
     def __getattr__(self, k):
@@ -939,9 +941,9 @@ def decode_entities(string):
     return string
 
 def encode_url(string):
-    return urllib.parse.quote_plus(bytestring(string)) # "black/white" => "black%2Fwhite".
+    return urllib_parse.quote_plus(bytestring(string)) # "black/white" => "black%2Fwhite".
 def decode_url(string):
-    return urllib.parse.unquote_plus(string)
+    return urllib_parse.unquote_plus(string)
 
 RE_SPACES = re.compile("( |\xa0)+", re.M) # Matches one or more spaces.
 RE_TABS   = re.compile(r"\t+", re.M)      # Matches one or more tabs.

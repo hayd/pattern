@@ -1,7 +1,3 @@
-from __future__ import division
-from __future__ import absolute_import
-from future.builtins import str
-from future.builtins import object
 #### PATTERN | WORDNET #############################################################################
 # -*- coding: utf-8 -*-
 # Copyright (c) 2010 University of Antwerp, Belgium
@@ -20,6 +16,11 @@ from future.builtins import object
 # -  holonym = a word that is the whole of parts,   (tree => forest)
 # -  meronym = a word that is a part of the whole,  (tree => trunk)
 # -  antonym = a word that is opposite in meaning.
+
+from __future__ import division
+from __future__ import absolute_import
+from future.builtins import str
+from future.builtins import object
 
 import os
 import sys

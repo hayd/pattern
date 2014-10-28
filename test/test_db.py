@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import print_function
 from future.builtins import str
 from future.builtins import zip
 from future.builtins import object
-# -*- coding: utf-8 -*-
+
 from util import *
 
 from pattern import db

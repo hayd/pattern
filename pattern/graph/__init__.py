@@ -1,8 +1,3 @@
-from __future__ import division
-from future.builtins import next
-from future.builtins import str
-from future.builtins import range
-from future.builtins import object
 #### PATTERN | GRAPH ###############################################################################
 # Copyright (c) 2010 University of Antwerp, Belgium
 # Author: Tom De Smedt <tom@organisms.be>
@@ -10,6 +5,12 @@ from future.builtins import object
 # http://www.clips.ua.ac.be/pages/pattern
 
 ####################################################################################################
+
+from __future__ import division
+from future.builtins import next
+from future.builtins import str
+from future.builtins import range
+from future.builtins import object
 
 import os
 import sys

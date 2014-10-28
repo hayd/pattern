@@ -1,6 +1,3 @@
-from __future__ import division
-from future.builtins import str
-from future.builtins import range
 #### PATTERN | EN | QUANTIFY #######################################################################
 # Copyright (c) 2010 University of Antwerp, Belgium
 # Author: Tom De Smedt <tom@organisms.be>
@@ -9,6 +6,10 @@ from future.builtins import range
 ####################################################################################################
 # Transforms numeral strings to numbers, and numbers (int, float) to numeral strings.
 # Approximates quantities of objects ("dozens of chickens" etc.)
+
+from __future__ import division
+from future.builtins import str
+from future.builtins import range
 
 import os
 import sys

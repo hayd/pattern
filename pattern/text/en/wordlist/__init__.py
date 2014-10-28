@@ -1,4 +1,3 @@
-from future.builtins import object
 #### PATTERN | VECTOR | WORDLIST ###################################################################
 # Copyright (c) 2010 University of Antwerp, Belgium
 # Author: Tom De Smedt <tom@organisms.be>
@@ -6,6 +5,8 @@ from future.builtins import object
 # http://www.clips.ua.ac.be/pages/pattern
 
 ####################################################################################################
+
+from future.builtins import object
 
 import os
 

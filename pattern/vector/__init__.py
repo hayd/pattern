@@ -1,14 +1,3 @@
-from __future__ import division
-from __future__ import absolute_import
-from future.builtins import next
-from future.builtins import map
-from future.builtins import zip
-from future.builtins import filter
-from future.builtins import str
-from future import standard_library
-standard_library.install_hooks()
-from future.builtins import range
-from future.builtins import object
 #### PATTERN | VECTOR ##############################################################################
 # -*- coding: utf-8 -*-
 # Copyright (c) 2010 University of Antwerp, Belgium
@@ -30,6 +19,18 @@ from future.builtins import object
 # This is called supervised machine learning (since we provide labeled training examples).
 # Unsupervised machine learning or clustering can be used to group unlabeled documents
 # into subsets based on their similarity.
+
+from __future__ import division
+from __future__ import absolute_import
+from future.builtins import next
+from future.builtins import map
+from future.builtins import zip
+from future.builtins import filter
+from future.builtins import str
+from future import standard_library
+standard_library.install_hooks()
+from future.builtins import range
+from future.builtins import object
 
 from . import stemmer; _stemmer=stemmer
 

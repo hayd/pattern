@@ -1,7 +1,3 @@
-from __future__ import division
-from __future__ import absolute_import
-from future import standard_library
-standard_library.install_hooks()
 #### PATTERN | COMMONSENSE #########################################################################
 # Copyright (c) 2010 University of Antwerp, Belgium
 # Author: Tom De Smedt <tom@organisms.be>
@@ -9,6 +5,11 @@ standard_library.install_hooks()
 # http://www.clips.ua.ac.be/pages/pattern
 
 ####################################################################################################
+
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_hooks()
 
 from codecs    import BOM_UTF8
 from urllib.request    import urlopen

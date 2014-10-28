@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+
+#### PATTERN | TEXT | PARSER #######################################################################
+# Copyright (c) 2010 University of Antwerp, Belgium
+# Author: Tom De Smedt <tom@organisms.be>
+# License: BSD (see LICENSE.txt for details).
+# http://www.clips.ua.ac.be/pages/pattern
+
+####################################################################################################
+
 from __future__ import division
 from __future__ import print_function
 from future.builtins import str
@@ -5,14 +15,7 @@ from future.builtins import map
 from future.builtins import zip
 from future.builtins import range
 from future.builtins import object
-#### PATTERN | TEXT | PARSER #######################################################################
-# -*- coding: utf-8 -*-
-# Copyright (c) 2010 University of Antwerp, Belgium
-# Author: Tom De Smedt <tom@organisms.be>
-# License: BSD (see LICENSE.txt for details).
-# http://www.clips.ua.ac.be/pages/pattern
 
-####################################################################################################
 
 import os
 import sys

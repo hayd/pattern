@@ -1,4 +1,3 @@
-from __future__ import division
 #### PATTERN | EN | MOOD & MODALITY ################################################################
 # -*- coding: utf-8 -*-
 # Copyright (c) 2010 University of Antwerp, Belgium
@@ -7,6 +6,8 @@ from __future__ import division
 # http://www.clips.ua.ac.be/pages/pattern
 
 ### LIST FUNCTIONS #################################################################################
+
+from __future__ import division
 
 def find(function, list):
     """ Returns the first item in the list for which function(item) is True, None otherwise.

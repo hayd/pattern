@@ -98,6 +98,8 @@ add custom attributes to your heart's content. Note that these handlers are
 used ''instead'' of the default, simple handlers outlined above (so don't set
 the "log.error_file" config entry, for example).
 """
+from future.builtins import str
+from future.builtins import object
 
 import datetime
 import logging
@@ -244,7 +246,7 @@ class LogManager(object):
                  'a': dict.get(inheaders, 'User-Agent', ''),
                  }
         if py3k:
-            for k, v in atoms.items():
+            for k, v in list(atoms.items()):
                 if not isinstance(v, str):
                     v = str(v)
                 v = v.replace('"', '\\"').encode('utf8')
@@ -265,8 +267,8 @@ class LogManager(object):
             except:
                 self(traceback=True)
         else:
-            for k, v in atoms.items():
-                if isinstance(v, unicode):
+            for k, v in list(atoms.items()):
+                if isinstance(v, str):
                     v = v.encode('utf8')
                 elif not isinstance(v, str):
                     v = str(v)

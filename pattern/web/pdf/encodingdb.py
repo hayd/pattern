@@ -1,6 +1,8 @@
 #!/usr/bin/env python2
 
 from __future__ import absolute_import
+from future.builtins import chr
+from future.builtins import object
 import re
 from .psparser import PSLiteral
 from .glyphlist import glyphname2unicode
@@ -16,7 +18,7 @@ def name2unicode(name):
         return glyphname2unicode[name]
     m = STRIP_NAME.search(name)
     if not m: raise KeyError(name)
-    return unichr(int(m.group(0)))
+    return chr(int(m.group(0)))
 
 
 ##  EncodingDB

@@ -1,5 +1,6 @@
 from __future__ import division
 from __future__ import print_function
+from future.builtins import range
 # -*- coding: utf-8 -*-
 from util import *
 
@@ -19,7 +20,7 @@ class TestInflection(unittest.TestCase):
         for w, lemma, tag, f in Datasheet.load(os.path.join(PATH, "corpora", "wordforms-es-davies.csv")):
             if tag == "n": test.setdefault(lemma, []).append(w)
         i, n = 0, 0
-        for sg, pl in test.items():
+        for sg, pl in list(test.items()):
             pl = sorted(pl, key=len, reverse=True)[0]
             if es.pluralize(sg) == pl:
                 i += 1
@@ -34,7 +35,7 @@ class TestInflection(unittest.TestCase):
         for w, lemma, tag, f in Datasheet.load(os.path.join(PATH, "corpora", "wordforms-es-davies.csv")):
             if tag == "n": test.setdefault(lemma, []).append(w)
         i, n = 0, 0
-        for sg, pl in test.items():
+        for sg, pl in list(test.items()):
             pl = sorted(pl, key=len, reverse=True)[0]
             if es.singularize(pl) == sg:
                 i += 1
@@ -62,7 +63,7 @@ class TestInflection(unittest.TestCase):
         for w, lemma, tag, f in Datasheet.load(os.path.join(PATH, "corpora", "wordforms-es-davies.csv")):
             if tag == "j": test.setdefault(lemma, []).append(w)
         i, n = 0, 0
-        for pred, attr in test.items():
+        for pred, attr in list(test.items()):
             attr = sorted(attr, key=len, reverse=True)[0]
             if es.predicative(attr) == pred:
                 i += 1
@@ -73,7 +74,7 @@ class TestInflection(unittest.TestCase):
     def test_find_lemma(self):
         # Assert the accuracy of the verb lemmatization algorithm.
         i, n = 0, 0
-        for v1, v2 in es.inflect.verbs.inflections.items():
+        for v1, v2 in list(es.inflect.verbs.inflections.items()):
             if es.inflect.verbs.find_lemma(v1) == v2: 
                 i += 1
             n += 1
@@ -83,7 +84,7 @@ class TestInflection(unittest.TestCase):
     def test_find_lexeme(self):
         # Assert the accuracy of the verb conjugation algorithm.
         i, n = 0, 0
-        for v, lexeme1 in es.inflect.verbs.infinitives.items():
+        for v, lexeme1 in list(es.inflect.verbs.infinitives.items()):
             lexeme2 = es.inflect.verbs.find_lexeme(v)
             for j in range(len(lexeme2)):
                 if lexeme1[j] == lexeme2[j]:

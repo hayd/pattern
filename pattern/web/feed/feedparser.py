@@ -9,6 +9,15 @@ Required: Python 2.4 or later
 Recommended: iconv_codec <http://cjkpython.i18n.org/>
 """
 from __future__ import division
+from future.builtins import bytes
+from future.builtins import map
+from future.builtins import filter
+from future.builtins import hex
+from future.builtins import chr
+from future.builtins import str
+from future import standard_library
+standard_library.install_hooks()
+from future.builtins import object
 
 __version__ = "5.1.2"
 __license__ = """
@@ -151,20 +160,20 @@ import re
 import struct
 import time
 import types
-import urllib
-import urllib2
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
+import future.standard_library.urllib.parse as urllib_parse
 import warnings
 
-from htmlentitydefs import name2codepoint, codepoint2name, entitydefs
+from future.standard_library.html.entities as html_entities import name2codepoint, codepoint2name, entitydefs
 
 try:
     from io import BytesIO as _StringIO
 except ImportError:
     try:
-        from cStringIO import StringIO as _StringIO
+        from io import StringIO as _StringIO
     except ImportError:
-        from StringIO import StringIO as _StringIO
+        from io import StringIO as _StringIO
 
 # ---------- optional modules (feedparser will work without these, but with reduced functionality) ----------
 
@@ -242,7 +251,7 @@ else:
     shorttagopen = sgmllib.shorttagopen
     starttagopen = sgmllib.starttagopen
 
-    class _EndBracketRegEx:
+    class _EndBracketRegEx(object):
         def __init__(self):
             # Overriding the built-in sgmllib.endbracket regex allows the
             # parser to find angle brackets embedded in element attributes.
@@ -254,7 +263,7 @@ else:
                 # resolves a thread-safety.
                 return EndBracketMatch(match)
             return None
-    class EndBracketMatch:
+    class EndBracketMatch(object):
         def __init__(self, match):
             self.match = match
         def start(self, n):
@@ -343,7 +352,7 @@ class FeedParserDict(dict):
             except IndexError:
                 raise KeyError("object doesn't have key 'category'")
         elif key == 'enclosures':
-            norel = lambda link: FeedParserDict([(name,value) for (name,value) in link.items() if name!='rel'])
+            norel = lambda link: FeedParserDict([(name,value) for (name,value) in list(link.items()) if name!='rel'])
             return [norel(link) for link in dict.__getitem__(self, 'links') if link['rel']==u'enclosure']
         elif key == 'license':
             for link in dict.__getitem__(self, 'links'):
@@ -428,50 +437,50 @@ class FeedParserDict(dict):
         return id(self)
 
 _cp1252 = {
-    128: unichr(8364), # euro sign
-    130: unichr(8218), # single low-9 quotation mark
-    131: unichr( 402), # latin small letter f with hook
-    132: unichr(8222), # double low-9 quotation mark
-    133: unichr(8230), # horizontal ellipsis
-    134: unichr(8224), # dagger
-    135: unichr(8225), # double dagger
-    136: unichr( 710), # modifier letter circumflex accent
-    137: unichr(8240), # per mille sign
-    138: unichr( 352), # latin capital letter s with caron
-    139: unichr(8249), # single left-pointing angle quotation mark
-    140: unichr( 338), # latin capital ligature oe
-    142: unichr( 381), # latin capital letter z with caron
-    145: unichr(8216), # left single quotation mark
-    146: unichr(8217), # right single quotation mark
-    147: unichr(8220), # left double quotation mark
-    148: unichr(8221), # right double quotation mark
-    149: unichr(8226), # bullet
-    150: unichr(8211), # en dash
-    151: unichr(8212), # em dash
-    152: unichr( 732), # small tilde
-    153: unichr(8482), # trade mark sign
-    154: unichr( 353), # latin small letter s with caron
-    155: unichr(8250), # single right-pointing angle quotation mark
-    156: unichr( 339), # latin small ligature oe
-    158: unichr( 382), # latin small letter z with caron
-    159: unichr( 376), # latin capital letter y with diaeresis
+    128: chr(8364), # euro sign
+    130: chr(8218), # single low-9 quotation mark
+    131: chr( 402), # latin small letter f with hook
+    132: chr(8222), # double low-9 quotation mark
+    133: chr(8230), # horizontal ellipsis
+    134: chr(8224), # dagger
+    135: chr(8225), # double dagger
+    136: chr( 710), # modifier letter circumflex accent
+    137: chr(8240), # per mille sign
+    138: chr( 352), # latin capital letter s with caron
+    139: chr(8249), # single left-pointing angle quotation mark
+    140: chr( 338), # latin capital ligature oe
+    142: chr( 381), # latin capital letter z with caron
+    145: chr(8216), # left single quotation mark
+    146: chr(8217), # right single quotation mark
+    147: chr(8220), # left double quotation mark
+    148: chr(8221), # right double quotation mark
+    149: chr(8226), # bullet
+    150: chr(8211), # en dash
+    151: chr(8212), # em dash
+    152: chr( 732), # small tilde
+    153: chr(8482), # trade mark sign
+    154: chr( 353), # latin small letter s with caron
+    155: chr(8250), # single right-pointing angle quotation mark
+    156: chr( 339), # latin small ligature oe
+    158: chr( 382), # latin small letter z with caron
+    159: chr( 376), # latin capital letter y with diaeresis
 }
 
 _urifixer = re.compile('^([A-Za-z][A-Za-z0-9+-.]*://)(/*)(.*?)')
 def _urljoin(base, uri):
     uri = _urifixer.sub(r'\1\3', uri)
     #try:
-    if not isinstance(uri, unicode):
+    if not isinstance(uri, str):
         uri = uri.decode('utf-8', 'ignore')
-    uri = urlparse.urljoin(base, uri)
-    if not isinstance(uri, unicode):
+    uri = urllib_parse.urljoin(base, uri)
+    if not isinstance(uri, str):
         return uri.decode('utf-8', 'ignore')
     return uri
     #except:
     #    uri = urlparse.urlunparse([urllib.quote(part) for part in urlparse.urlparse(uri)])
     #    return urlparse.urljoin(base, uri)
 
-class _FeedParserMixin:
+class _FeedParserMixin(object):
     namespaces = {
         '': '',
         'http://backend.userland.com/rss': '',
@@ -546,7 +555,7 @@ class _FeedParserMixin:
 
     def __init__(self, baseuri=None, baselang=None, encoding=u'utf-8'):
         if not self._matchnamespaces:
-            for k, v in self.namespaces.items():
+            for k, v in list(self.namespaces.items()):
                 self._matchnamespaces[k.lower()] = v
         self.feeddata = FeedParserDict() # feed-level data
         self.encoding = encoding # character encoding
@@ -597,7 +606,7 @@ class _FeedParserMixin:
         # strict xml parsers do -- account for this difference
         if isinstance(self, _LooseFeedParser):
             v = v.replace('&amp;', '&')
-            if not isinstance(v, unicode):
+            if not isinstance(v, str):
                 v = v.decode('utf-8')
         return (k, v)
 
@@ -606,12 +615,12 @@ class _FeedParserMixin:
         self.depth += 1
 
         # normalize attrs
-        attrs = map(self._normalize_attributes, attrs)
+        attrs = list(map(self._normalize_attributes, attrs))
 
         # track xml:base and xml:lang
         attrsD = dict(attrs)
         baseuri = attrsD.get('xml:base', attrsD.get('base')) or self.baseuri
-        if not isinstance(baseuri, unicode):
+        if not isinstance(baseuri, str):
             baseuri = baseuri.decode(self.encoding, 'ignore')
         # ensure that self.baseuri is always an absolute URI that
         # uses a whitelisted URI scheme (e.g. not `javscript:`)
@@ -745,7 +754,7 @@ class _FeedParserMixin:
                 c = int(ref[1:], 16)
             else:
                 c = int(ref)
-            text = unichr(c).encode('utf-8')
+            text = chr(c).encode('utf-8')
         self.elementstack[-1][2].append(text)
 
     def handle_entityref(self, ref):
@@ -764,7 +773,7 @@ class _FeedParserMixin:
             except KeyError:
                 text = '&%s;' % ref
             else:
-                text = unichr(name2codepoint[ref]).encode('utf-8')
+                text = chr(name2codepoint[ref]).encode('utf-8')
         self.elementstack[-1][2].append(text)
 
     def handle_data(self, text, escape=1):
@@ -877,7 +886,7 @@ class _FeedParserMixin:
 
         # Ensure each piece is a str for Python 3
         for (i, v) in enumerate(pieces):
-            if not isinstance(v, unicode):
+            if not isinstance(v, str):
                 pieces[i] = v.decode('utf-8')
 
         output = u''.join(pieces)
@@ -950,19 +959,19 @@ class _FeedParserMixin:
             if element in self.can_contain_dangerous_markup:
                 output = _sanitizeHTML(output, self.encoding, self.contentparams.get('type', u'text/html'))
 
-        if self.encoding and not isinstance(output, unicode):
+        if self.encoding and not isinstance(output, str):
             output = output.decode(self.encoding, 'ignore')
 
         # address common error where people take data that is already
         # utf-8, presume that it is iso-8859-1, and re-encode it.
-        if self.encoding in (u'utf-8', u'utf-8_INVALID_PYTHON_3') and isinstance(output, unicode):
+        if self.encoding in (u'utf-8', u'utf-8_INVALID_PYTHON_3') and isinstance(output, str):
             try:
                 output = output.encode('iso-8859-1').decode('utf-8')
             except (UnicodeEncodeError, UnicodeDecodeError):
                 pass
 
         # map win-1252 extensions to the proper code points
-        if isinstance(output, unicode):
+        if isinstance(output, str):
             output = output.translate(_cp1252)
 
         # categories/tags/keywords/whatever are handled in _end_category
@@ -1043,12 +1052,11 @@ class _FeedParserMixin:
             return
 
         # all tags must be in a restricted subset of valid HTML tags
-        if filter(lambda t: t.lower() not in _HTMLSanitizer.acceptable_elements,
-            re.findall(r'</?(\w+)',s)):
+        if [t for t in re.findall(r'</?(\w+)',s) if t.lower() not in _HTMLSanitizer.acceptable_elements]:
             return
 
         # all entities must have been defined as valid HTML entities
-        if filter(lambda e: e not in entitydefs.keys(), re.findall(r'&(\w+);', s)):
+        if [e for e in re.findall(r'&(\w+);', s) if e not in list(entitydefs.keys())]:
             return
 
         return 1
@@ -1576,7 +1584,7 @@ class _FeedParserMixin:
 
     def _start_title(self, attrsD):
         if self.svgOK:
-            return self.unknown_starttag('title', attrsD.items())
+            return self.unknown_starttag('title', list(attrsD.items()))
         self.pushContent('title', attrsD, u'text/plain', self.infeed or self.inentry or self.insource)
     _start_dc_title = _start_title
     _start_media_title = _start_title
@@ -1826,12 +1834,12 @@ if _XML_AVAILABLE:
             if prefix:
                 localname = prefix.lower() + ':' + localname
             elif namespace and not qname: #Expat
-                for name,value in self.namespacesInUse.items():
+                for name,value in list(self.namespacesInUse.items()):
                     if name and value == namespace:
                         localname = name + ':' + localname
                         break
 
-            for (namespace, attrlocalname), attrvalue in attrs.items():
+            for (namespace, attrlocalname), attrvalue in list(attrs.items()):
                 lowernamespace = (namespace or '').lower()
                 prefix = self._matchnamespaces.get(lowernamespace, '')
                 if prefix:
@@ -1839,7 +1847,7 @@ if _XML_AVAILABLE:
                 attrsD[str(attrlocalname).lower()] = attrvalue
             for qname in attrs.getQNames():
                 attrsD[str(qname).lower()] = attrs.getValueByQName(qname)
-            self.unknown_starttag(localname, attrsD.items())
+            self.unknown_starttag(localname, list(attrsD.items()))
 
         def characters(self, text):
             self.handle_data(text)
@@ -1855,7 +1863,7 @@ if _XML_AVAILABLE:
             if prefix:
                 localname = prefix + ':' + localname
             elif namespace and not qname: #Expat
-                for name,value in self.namespacesInUse.items():
+                for name,value in list(self.namespacesInUse.items()):
                     if name and value == namespace:
                         localname = name + ':' + localname
                         break
@@ -1929,7 +1937,7 @@ class _BaseHTMLProcessor(sgmllib.SGMLParser):
                 raise NameError
             self.encoding = self.encoding + u'_INVALID_PYTHON_3'
         except NameError:
-            if self.encoding and isinstance(data, unicode):
+            if self.encoding and isinstance(data, str):
                 data = data.encode(self.encoding)
         sgmllib.SGMLParser.feed(self, data)
         sgmllib.SGMLParser.close(self)
@@ -1938,7 +1946,7 @@ class _BaseHTMLProcessor(sgmllib.SGMLParser):
         if not attrs:
             return attrs
         # utility method to be called by descendants
-        attrs = dict([(k.lower(), v) for k, v in attrs]).items()
+        attrs = list(dict([(k.lower(), v) for k, v in attrs]).items())
         attrs = [(k, k in ('rel', 'type') and v.lower() or v) for k, v in attrs]
         attrs.sort()
         return attrs
@@ -1954,11 +1962,11 @@ class _BaseHTMLProcessor(sgmllib.SGMLParser):
                 value=value.replace('>','&gt;').replace('<','&lt;').replace('"','&quot;')
                 value = self.bare_ampersand.sub("&amp;", value)
                 # thanks to Kevin Marks for this breathtaking hack to deal with (valid) high-bit attribute values in UTF-8 feeds
-                if not isinstance(value, unicode):
+                if not isinstance(value, str):
                     value = value.decode(self.encoding, 'ignore')
                 try:
                     # Currently, in Python 3 the key is already a str, and cannot be decoded again
-                    uattrs.append((unicode(key, self.encoding), value))
+                    uattrs.append((str(key, self.encoding), value))
                 except TypeError:
                     uattrs.append((key, value))
             strattrs = u''.join([u' %s="%s"' % (key, value) for key, value in uattrs])
@@ -2089,7 +2097,7 @@ class _LooseFeedParser(_FeedParserMixin, _BaseHTMLProcessor):
     def strattrs(self, attrs):
         return ''.join([' %s="%s"' % (n,v.replace('"','&quot;')) for n,v in attrs])
 
-class _MicroformatsParser:
+class _MicroformatsParser(object):
     STRING = 1
     DATE = 2
     URI = 3
@@ -2103,7 +2111,7 @@ class _MicroformatsParser:
         self.document = BeautifulSoup.BeautifulSoup(data)
         self.baseuri = baseuri
         self.encoding = encoding
-        if isinstance(data, unicode):
+        if isinstance(data, str):
             data = data.encode(encoding)
         self.tags = []
         self.enclosures = []
@@ -2111,7 +2119,7 @@ class _MicroformatsParser:
         self.vcard = None
 
     def vcardEscape(self, s):
-        if isinstance(s, basestring):
+        if isinstance(s, str):
             s = s.replace(',', '\\,').replace(';', '\\;').replace('\n', '\\n')
         return s
 
@@ -2450,7 +2458,7 @@ class _MicroformatsParser:
                 arLines = [u'BEGIN:vCard',u'VERSION:3.0'] + arLines + [u'END:vCard']
                 # XXX - this is super ugly; properly fix this with issue 148
                 for i, s in enumerate(arLines):
-                    if not isinstance(s, unicode):
+                    if not isinstance(s, str):
                         arLines[i] = s.decode('utf-8', 'ignore')
                 sVCards += u'\n'.join(arLines) + u'\n'
 
@@ -2465,7 +2473,7 @@ class _MicroformatsParser:
            linktype.startswith('video/') or \
            (linktype.startswith('application/') and not linktype.endswith('xml')):
             return 1
-        path = urlparse.urlparse(attrsD['href'])[2]
+        path = urllib_parse.urlparse(attrsD['href'])[2]
         if path.find('.') == -1:
             return 0
         fileext = path.split('.').pop().lower()
@@ -2478,7 +2486,7 @@ class _MicroformatsParser:
             if not href:
                 continue
             urlscheme, domain, path, params, query, fragment = \
-                       urlparse.urlparse(_urljoin(self.baseuri, href))
+                       urllib_parse.urlparse(_urljoin(self.baseuri, href))
             segments = path.split('/')
             tag = segments.pop()
             if not tag:
@@ -2487,7 +2495,7 @@ class _MicroformatsParser:
                 else:
                     # there are no tags
                     continue
-            tagscheme = urlparse.urlunparse((urlscheme, domain, '/'.join(segments), '', '', ''))
+            tagscheme = urllib_parse.urlunparse((urlscheme, domain, '/'.join(segments), '', '', ''))
             if not tagscheme.endswith('/'):
                 tagscheme += '/'
             self.tags.append(FeedParserDict({"term": tag, "scheme": tagscheme, "label": elm.string or ''}))
@@ -2584,7 +2592,7 @@ def _makeSafeAbsoluteURI(base, rel=None):
         return rel or u''
     if not rel:
         try:
-            scheme = urlparse.urlparse(base)[0]
+            scheme = urllib_parse.urlparse(base)[0]
         except ValueError:
             return u''
         if not scheme or scheme in ACCEPTABLE_URI_SCHEMES:
@@ -2772,7 +2780,7 @@ class _HTMLSanitizer(_BaseHTMLProcessor):
 
         # declare xlink namespace, if needed
         if self.mathmlOK or self.svgOK:
-            if filter(lambda n,v: n.startswith('xlink:'),attrs):
+            if list(filter(lambda n,v: n.startswith('xlink:'),attrs)):
                 if not ('xmlns:xlink','http://www.w3.org/1999/xlink') in attrs:
                     attrs.append(('xmlns:xlink','http://www.w3.org/1999/xlink'))
 
@@ -2884,12 +2892,12 @@ def _sanitizeHTML(htmlSource, encoding, _type):
             except:
                 pass
         if _tidy:
-            utf8 = isinstance(data, unicode)
+            utf8 = isinstance(data, str)
             if utf8:
                 data = data.encode('utf-8')
             data = _tidy(data, output_xhtml=1, numeric_entities=1, wrap=0, char_encoding="utf8")
             if utf8:
-                data = unicode(data, 'utf-8')
+                data = str(data, 'utf-8')
             if data.count('<body'):
                 data = data.split('<body', 1)[1]
                 if data.count('>'):
@@ -2899,7 +2907,7 @@ def _sanitizeHTML(htmlSource, encoding, _type):
     data = data.strip().replace('\r\n', '\n')
     return data
 
-class _FeedURLHandler(urllib2.HTTPDigestAuthHandler, urllib2.HTTPRedirectHandler, urllib2.HTTPDefaultErrorHandler):
+class _FeedURLHandler(urllib.request.HTTPDigestAuthHandler, urllib.request.HTTPRedirectHandler, urllib.request.HTTPDefaultErrorHandler):
     def http_error_default(self, req, fp, code, msg, headers):
         # The default implementation just raises HTTPError.
         # Forget that.
@@ -2907,7 +2915,7 @@ class _FeedURLHandler(urllib2.HTTPDigestAuthHandler, urllib2.HTTPRedirectHandler
         return fp
 
     def http_error_301(self, req, fp, code, msg, hdrs):
-        result = urllib2.HTTPRedirectHandler.http_error_301(self, req, fp,
+        result = urllib.request.HTTPRedirectHandler.http_error_301(self, req, fp,
                                                             code, msg, hdrs)
         result.status = code
         result.newurl = result.geturl()
@@ -2930,7 +2938,7 @@ class _FeedURLHandler(urllib2.HTTPDigestAuthHandler, urllib2.HTTPRedirectHandler
         # header the server sent back (for the realm) and retry
         # the request with the appropriate digest auth headers instead.
         # This evil genius hack has been brought to you by Aaron Swartz.
-        host = urlparse.urlparse(req.get_full_url())[1]
+        host = urllib_parse.urlparse(req.get_full_url())[1]
         if base64 is None or 'Authorization' not in req.headers \
                           or 'WWW-Authenticate' not in headers:
             return self.http_error_default(req, fp, code, msg, headers)
@@ -2977,8 +2985,8 @@ def _open_resource(url_file_stream_or_string, etag, modified, agent, referrer, h
     if hasattr(url_file_stream_or_string, 'read'):
         return url_file_stream_or_string
 
-    if isinstance(url_file_stream_or_string, basestring) \
-       and urlparse.urlparse(url_file_stream_or_string)[0] in ('http', 'https', 'ftp', 'file', 'feed'):
+    if isinstance(url_file_stream_or_string, str) \
+       and urllib_parse.urlparse(url_file_stream_or_string)[0] in ('http', 'https', 'ftp', 'file', 'feed'):
         # Deal with the feed URI scheme
         if url_file_stream_or_string.startswith('feed:http'):
             url_file_stream_or_string = url_file_stream_or_string[5:]
@@ -2989,21 +2997,21 @@ def _open_resource(url_file_stream_or_string, etag, modified, agent, referrer, h
         # test for inline user:password for basic auth
         auth = None
         if base64:
-            urltype, rest = urllib.splittype(url_file_stream_or_string)
-            realhost, rest = urllib.splithost(rest)
+            urltype, rest = urllib.parse.splittype(url_file_stream_or_string)
+            realhost, rest = urllib.parse.splithost(rest)
             if realhost:
-                user_passwd, realhost = urllib.splituser(realhost)
+                user_passwd, realhost = urllib.parse.splituser(realhost)
                 if user_passwd:
                     url_file_stream_or_string = '%s://%s%s' % (urltype, realhost, rest)
                     auth = base64.standard_b64encode(user_passwd).strip()
 
         # iri support
-        if isinstance(url_file_stream_or_string, unicode):
+        if isinstance(url_file_stream_or_string, str):
             url_file_stream_or_string = _convert_to_idn(url_file_stream_or_string)
 
         # try to open with urllib2 (to use optional headers)
         request = _build_urllib2_request(url_file_stream_or_string, agent, etag, modified, referrer, auth, request_headers)
-        opener = urllib2.build_opener(*tuple(handlers + [_FeedURLHandler()]))
+        opener = urllib.request.build_opener(*tuple(handlers + [_FeedURLHandler()]))
         opener.addheaders = [] # RMK - must clear so we only send our custom User-Agent
         try:
             return opener.open(request)
@@ -3024,7 +3032,7 @@ def _open_resource(url_file_stream_or_string, etag, modified, agent, referrer, h
         pass
 
     # treat url_file_stream_or_string as string
-    if isinstance(url_file_stream_or_string, unicode):
+    if isinstance(url_file_stream_or_string, str):
         return _StringIO(url_file_stream_or_string.encode('utf-8'))
     return _StringIO(url_file_stream_or_string)
 
@@ -3033,7 +3041,7 @@ def _convert_to_idn(url):
     # this function should only be called with a unicode string
     # strategy: if the host cannot be encoded in ascii, then
     # it'll be necessary to encode it in idn form
-    parts = list(urlparse.urlsplit(url))
+    parts = list(urllib_parse.urlsplit(url))
     try:
         parts[1].encode('ascii')
     except UnicodeEncodeError:
@@ -3048,16 +3056,16 @@ def _convert_to_idn(url):
         parts[1] = '.'.join(newhost)
         if port:
             parts[1] += ':' + port
-        return urlparse.urlunsplit(parts)
+        return urllib_parse.urlunsplit(parts)
     else:
         return url
 
 def _build_urllib2_request(url, agent, etag, modified, referrer, auth, request_headers):
-    request = urllib2.Request(url)
+    request = urllib.request.Request(url)
     request.add_header('User-Agent', agent)
     if etag:
         request.add_header('If-None-Match', etag)
-    if isinstance(modified, basestring):
+    if isinstance(modified, str):
         modified = _parse_date(modified)
     elif isinstance(modified, datetime.datetime):
         modified = modified.utctimetuple()
@@ -3085,7 +3093,7 @@ def _build_urllib2_request(url, agent, etag, modified, referrer, auth, request_h
         request.add_header('Accept', ACCEPT_HEADER)
     # use this for whatever -- cookies, special headers, etc
     # [('Cookie','Something'),('x-special-header','Another Value')]
-    for header_name, header_value in request_headers.items():
+    for header_name, header_value in list(request_headers.items()):
         request.add_header(header_name, header_value)
     request.add_header('A-IM', 'feed') # RFC 3229 support
     return request
@@ -3625,7 +3633,7 @@ def _getCharacterEncoding(http_headers, xml_data):
         content_type = content_type or ''
         content_type, params = cgi.parse_header(content_type)
         charset = params.get('charset', '').replace("'", "")
-        if not isinstance(charset, unicode):
+        if not isinstance(charset, str):
             charset = charset.decode('utf-8', 'ignore')
         return content_type, charset
 
@@ -3646,43 +3654,43 @@ def _getCharacterEncoding(http_headers, xml_data):
         elif xml_data[:4] == _l2bytes([0x00, 0x3c, 0x00, 0x3f]):
             # UTF-16BE
             sniffed_xml_encoding = u'utf-16be'
-            xml_data = unicode(xml_data, 'utf-16be').encode('utf-8')
+            xml_data = str(xml_data, 'utf-16be').encode('utf-8')
         elif (len(xml_data) >= 4) and (xml_data[:2] == _l2bytes([0xfe, 0xff])) and (xml_data[2:4] != _l2bytes([0x00, 0x00])):
             # UTF-16BE with BOM
             sniffed_xml_encoding = u'utf-16be'
-            xml_data = unicode(xml_data[2:], 'utf-16be').encode('utf-8')
+            xml_data = str(xml_data[2:], 'utf-16be').encode('utf-8')
         elif xml_data[:4] == _l2bytes([0x3c, 0x00, 0x3f, 0x00]):
             # UTF-16LE
             sniffed_xml_encoding = u'utf-16le'
-            xml_data = unicode(xml_data, 'utf-16le').encode('utf-8')
+            xml_data = str(xml_data, 'utf-16le').encode('utf-8')
         elif (len(xml_data) >= 4) and (xml_data[:2] == _l2bytes([0xff, 0xfe])) and (xml_data[2:4] != _l2bytes([0x00, 0x00])):
             # UTF-16LE with BOM
             sniffed_xml_encoding = u'utf-16le'
-            xml_data = unicode(xml_data[2:], 'utf-16le').encode('utf-8')
+            xml_data = str(xml_data[2:], 'utf-16le').encode('utf-8')
         elif xml_data[:4] == _l2bytes([0x00, 0x00, 0x00, 0x3c]):
             # UTF-32BE
             sniffed_xml_encoding = u'utf-32be'
             if _UTF32_AVAILABLE:
-                xml_data = unicode(xml_data, 'utf-32be').encode('utf-8')
+                xml_data = str(xml_data, 'utf-32be').encode('utf-8')
         elif xml_data[:4] == _l2bytes([0x3c, 0x00, 0x00, 0x00]):
             # UTF-32LE
             sniffed_xml_encoding = u'utf-32le'
             if _UTF32_AVAILABLE:
-                xml_data = unicode(xml_data, 'utf-32le').encode('utf-8')
+                xml_data = str(xml_data, 'utf-32le').encode('utf-8')
         elif xml_data[:4] == _l2bytes([0x00, 0x00, 0xfe, 0xff]):
             # UTF-32BE with BOM
             sniffed_xml_encoding = u'utf-32be'
             if _UTF32_AVAILABLE:
-                xml_data = unicode(xml_data[4:], 'utf-32be').encode('utf-8')
+                xml_data = str(xml_data[4:], 'utf-32be').encode('utf-8')
         elif xml_data[:4] == _l2bytes([0xff, 0xfe, 0x00, 0x00]):
             # UTF-32LE with BOM
             sniffed_xml_encoding = u'utf-32le'
             if _UTF32_AVAILABLE:
-                xml_data = unicode(xml_data[4:], 'utf-32le').encode('utf-8')
+                xml_data = str(xml_data[4:], 'utf-32le').encode('utf-8')
         elif xml_data[:3] == _l2bytes([0xef, 0xbb, 0xbf]):
             # UTF-8 with BOM
             sniffed_xml_encoding = u'utf-8'
-            xml_data = unicode(xml_data[3:], 'utf-8').encode('utf-8')
+            xml_data = str(xml_data[3:], 'utf-8').encode('utf-8')
         else:
             # ASCII-compatible
             pass
@@ -3738,7 +3746,7 @@ def _toUTF8(data, encoding):
     elif data[:4] == _l2bytes([0xff, 0xfe, 0x00, 0x00]):
         encoding = 'utf-32le'
         data = data[4:]
-    newdata = unicode(data, encoding)
+    newdata = str(data, encoding)
     declmatch = re.compile('^<\?xml[^>]*?>')
     newdecl = '''<?xml version='1.0' encoding='utf-8'?>'''
     if declmatch.search(newdata):
@@ -3772,7 +3780,7 @@ def _stripDoctype(data):
     replacement=_s2bytes('')
     if len(doctype_results)==1 and entity_results:
         safe_pattern=re.compile(_s2bytes('\s+(\w+)\s+"(&#\w+;|[^&"]*)"'))
-        safe_entities=filter(lambda e: safe_pattern.match(e),entity_results)
+        safe_entities=[e for e in entity_results if safe_pattern.match(e)]
         if safe_entities:
             replacement=_s2bytes('<!DOCTYPE feed [\n  <!ENTITY') + _s2bytes('>\n  <!ENTITY ').join(safe_entities) + _s2bytes('>\n]>')
     data = doctype_pattern.sub(replacement, head) + data
@@ -3818,7 +3826,7 @@ def parse(url_file_stream_or_string, etag=None, modified=None, agent=None, refer
 
     # lowercase all of the HTTP headers for comparisons per RFC 2616
     if 'headers' in result:
-        http_headers = dict((k.lower(), v) for k, v in result['headers'].items())
+        http_headers = dict((k.lower(), v) for k, v in list(result['headers'].items()))
     else:
         http_headers = {}
 
@@ -3852,7 +3860,7 @@ def parse(url_file_stream_or_string, etag=None, modified=None, agent=None, refer
     if http_headers:
         if 'etag' in http_headers:
             etag = http_headers.get('etag', u'')
-            if not isinstance(etag, unicode):
+            if not isinstance(etag, str):
                 etag = etag.decode('utf-8', 'ignore')
             if etag:
                 result['etag'] = etag
@@ -3862,7 +3870,7 @@ def parse(url_file_stream_or_string, etag=None, modified=None, agent=None, refer
                 result['modified'] = modified
                 result['modified_parsed'] = _parse_date(modified)
     if hasattr(f, 'url'):
-        if not isinstance(f.url, unicode):
+        if not isinstance(f.url, str):
             result['href'] = f.url.decode('utf-8', 'ignore')
         else:
             result['href'] = f.url
@@ -3896,7 +3904,7 @@ def parse(url_file_stream_or_string, etag=None, modified=None, agent=None, refer
     baseuri = _makeSafeAbsoluteURI(href, contentloc) or _makeSafeAbsoluteURI(contentloc) or href
 
     baselang = http_headers.get('content-language', None)
-    if not isinstance(baselang, unicode) and baselang is not None:
+    if not isinstance(baselang, str) and baselang is not None:
         baselang = baselang.decode('utf-8', 'ignore')
 
     # if server sent 304, we're done
@@ -3930,7 +3938,7 @@ def parse(url_file_stream_or_string, etag=None, modified=None, agent=None, refer
             break
     # if no luck and we have auto-detection library, try that
     if (not known_encoding) and chardet:
-        proposed_encoding = unicode(chardet.detect(data)['encoding'], 'ascii', 'ignore')
+        proposed_encoding = str(chardet.detect(data)['encoding'], 'ascii', 'ignore')
         if proposed_encoding and (proposed_encoding not in tried_encodings):
             tried_encodings.append(proposed_encoding)
             try:

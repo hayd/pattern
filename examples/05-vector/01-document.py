@@ -72,7 +72,7 @@ print()
 document = Document("a black cat and a white cat", stopwords=True)
 print(document.words)
 print(document.vector.features)
-for feature, weight in document.vector.items():
+for feature, weight in list(document.vector.items()):
     print(feature, weight)
 
 # Document vectors can be bundled into a Model (next example).

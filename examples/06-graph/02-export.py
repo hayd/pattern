@@ -1,3 +1,5 @@
+from future.builtins import str
+from future.builtins import range
 import os, sys; sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from pattern.graph import Graph, WEIGHT, CENTRALITY, DEGREE, DEFAULT

@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 from __future__ import absolute_import
+from future.builtins import object
 from .psparser import LIT
 
 
@@ -31,4 +32,4 @@ PREDEFINED_COLORSPACE = dict(
   'Separation': 1,
   'Indexed': 1,
   'Pattern': 1,
-  }.iteritems())
+  }.items())

@@ -230,7 +230,7 @@ def negated(sentence, negative=("not", "n't", "never")):
 def mood(sentence, **kwargs):
     """ Returns IMPERATIVE (command), CONDITIONAL (possibility), SUBJUNCTIVE (wish) or INDICATIVE (fact).
     """
-    if isinstance(sentence, basestring):
+    if isinstance(sentence, str):
         try:
             # A Sentence is expected but a string given.
             # Attempt to parse the string on-the-fly.
@@ -392,7 +392,7 @@ def modality(sentence, type=EPISTEMIC):
         Currently, the only type implemented is EPISTEMIC.
         Epistemic modality is used to express possibility (i.e. how truthful is what is being said).
     """
-    if isinstance(sentence, basestring):
+    if isinstance(sentence, str):
         try:
             # A Sentence is expected but a string given.
             # Attempt to parse the string on-the-fly.
@@ -405,7 +405,7 @@ def modality(sentence, type=EPISTEMIC):
         raise TypeError("%s object is not a parsed Sentence" % repr(S.__class__.__name__))
     if type == EPISTEMIC:
         r = S.string.rstrip(" .!")
-        for k, v in epistemic_weaseling.items():
+        for k, v in list(epistemic_weaseling.items()):
             for phrase in v:
                 if phrase in r:
                     n += k
@@ -428,7 +428,7 @@ def modality(sentence, type=EPISTEMIC):
                     weight += 1
                 # likely" => score 0.25 (neutral inclining towards positive).
                 if w.type and w.type.startswith(type):
-                    for k, v in dict.items():
+                    for k, v in list(dict.items()):
                         # Prefer lemmata.
                         if (w.lemma or s(w)) in v: 
                             # Reverse score for negated terms.

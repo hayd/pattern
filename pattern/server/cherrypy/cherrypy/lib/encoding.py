@@ -1,8 +1,10 @@
+from future.builtins import str
+from future.builtins import object
 import struct
 import time
 
 import cherrypy
-from cherrypy._cpcompat import basestring, BytesIO, ntob, set, unicodestr
+from cherrypy._cpcompat import str, BytesIO, ntob, set, unicodestr
 from cherrypy.lib import file_generator
 from cherrypy.lib import set_vary_header
 
@@ -34,7 +36,7 @@ def decode(encoding=None, default_encoding='utf-8'):
         body.attempt_charsets = body.attempt_charsets + default_encoding
 
 
-class ResponseEncoder:
+class ResponseEncoder(object):
 
     default_encoding = 'utf-8'
     failmsg = "Response body could not be encoded with %r."
@@ -45,7 +47,7 @@ class ResponseEncoder:
     debug = False
 
     def __init__(self, **kwargs):
-        for k, v in kwargs.items():
+        for k, v in list(kwargs.items()):
             setattr(self, k, v)
 
         self.attempted_charsets = set()
@@ -187,7 +189,7 @@ class ResponseEncoder:
         response = cherrypy.serving.response
         self.body = self.oldhandler(*args, **kwargs)
 
-        if isinstance(self.body, basestring):
+        if isinstance(self.body, str):
             # strings get wrapped in a list because iterating over a single
             # item list is much faster than iterating over every character
             # in a long string.

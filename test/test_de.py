@@ -1,5 +1,6 @@
 from __future__ import division
 from __future__ import print_function
+from future.builtins import range
 # -*- coding: utf-8 -*-
 from util import *
 
@@ -82,7 +83,7 @@ class TestInflection(unittest.TestCase):
         # Note: the accuracy is higher (88%) when measured on CELEX word forms
         # (presumably because de.inflect.verbs has high percentage irregular verbs).
         i, n = 0, 0
-        for v1, v2 in de.inflect.verbs.inflections.items():
+        for v1, v2 in list(de.inflect.verbs.inflections.items()):
             if de.inflect.verbs.find_lemma(v1) == v2: 
                 i += 1
             n += 1
@@ -92,7 +93,7 @@ class TestInflection(unittest.TestCase):
     def test_find_lexeme(self):
         # Assert the accuracy of the verb conjugation algorithm.
         i, n = 0, 0
-        for v, lexeme1 in de.inflect.verbs.infinitives.items():
+        for v, lexeme1 in list(de.inflect.verbs.infinitives.items()):
             lexeme2 = de.inflect.verbs.find_lexeme(v)
             for j in range(len(lexeme2)):
                 if lexeme1[j] == "":

@@ -134,6 +134,10 @@ affects what we see:
 
 >>> del mydata
 """
+from future.builtins import str
+from future import standard_library
+standard_library.install_hooks()
+from future.builtins import object
 
 # Threading import is at end
 

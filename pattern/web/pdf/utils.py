@@ -3,6 +3,10 @@
 Miscellaneous Routines.
 """
 from __future__ import division
+from future.builtins import chr
+from future.builtins import str
+from future.builtins import range
+from future.builtins import object
 import struct
 from sys import maxsize as INF
 
@@ -73,7 +77,7 @@ def fsplit(pred, objs):
 def drange(v0, v1, d):
     """Returns a discrete range."""
     assert v0 < v1
-    return xrange(int(v0)/d, int(v1+d-1)/d)
+    return range(int(v0)/d, int(v1+d-1)/d)
 
 # get_bound
 def get_bound(pts):
@@ -125,7 +129,7 @@ def nunpack(s, default=0):
         raise TypeError('invalid length: %d' % l)
 
 # decode_text
-PDFDocEncoding = ''.join( unichr(x) for x in (
+PDFDocEncoding = ''.join( chr(x) for x in (
   0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007,
   0x0008, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d, 0x000e, 0x000f,
   0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015, 0x0017, 0x0017,
@@ -162,7 +166,7 @@ PDFDocEncoding = ''.join( unichr(x) for x in (
 def decode_text(s):
     """Decodes a PDFDocEncoding string to Unicode."""
     if s.startswith('\xfe\xff'):
-        return unicode(s[2:], 'utf-16be', 'ignore')
+        return str(s[2:], 'utf-16be', 'ignore')
     else:
         return ''.join( PDFDocEncoding[ord(c)] for c in s )
 

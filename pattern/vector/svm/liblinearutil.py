@@ -3,6 +3,7 @@
 from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
+from future.builtins import zip
 import os, sys
 sys.path = [os.path.dirname(os.path.abspath(__file__))] + sys.path 
 from .liblinear import *

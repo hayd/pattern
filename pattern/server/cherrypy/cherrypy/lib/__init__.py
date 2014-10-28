@@ -1,4 +1,5 @@
 """CherryPy Library"""
+from future.builtins import object
 
 # Deprecated in CherryPy 3.2 -- remove in CherryPy 3.3
 from cherrypy.lib.reprconf import unrepr, modules, attributes

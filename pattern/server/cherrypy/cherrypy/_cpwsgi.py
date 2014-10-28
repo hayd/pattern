@@ -6,6 +6,8 @@ it's a unicode string. But PEP 3333 says: "even if Python's str type is
 actually Unicode "under the hood", the content of native strings must
 still be translatable to bytes via the Latin-1 encoding!"
 """
+from future.builtins import next
+from future.builtins import object
 
 import sys as _sys
 

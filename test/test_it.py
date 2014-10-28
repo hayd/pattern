@@ -1,5 +1,6 @@
 from __future__ import division
 from __future__ import print_function
+from future.builtins import range
 # -*- coding: utf-8 -*-
 from util import *
 
@@ -93,7 +94,7 @@ class TestInflection(unittest.TestCase):
         # Assert the accuracy of the verb lemmatization algorithm.
         i, n = 0, 0
         r = 0
-        for v1, v2 in it.inflect.verbs.inflections.items():
+        for v1, v2 in list(it.inflect.verbs.inflections.items()):
             if it.inflect.verbs.find_lemma(v1) == v2: 
                 i += 1
             n += 1
@@ -103,7 +104,7 @@ class TestInflection(unittest.TestCase):
     def test_find_lexeme(self):
         # Assert the accuracy of the verb conjugation algorithm.
         i, n = 0, 0
-        for v, lexeme1 in it.inflect.verbs.infinitives.items():
+        for v, lexeme1 in list(it.inflect.verbs.infinitives.items()):
             lexeme2 = it.inflect.verbs.find_lexeme(v)
             for j in range(len(lexeme2)):
                 if lexeme1[j] == lexeme2[j]:

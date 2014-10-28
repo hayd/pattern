@@ -110,6 +110,8 @@ Please see `Lighttpd FastCGI Docs
 <http://redmine.lighttpd.net/wiki/lighttpd/Docs:ModFastCGI>`_ for an explanation
 of the possible configuration options.
 """
+from future.builtins import range
+from future.builtins import object
 
 import sys
 import time

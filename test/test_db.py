@@ -1,4 +1,7 @@
 from __future__ import print_function
+from future.builtins import str
+from future.builtins import zip
+from future.builtins import object
 # -*- coding: utf-8 -*-
 from util import *
 
@@ -60,7 +63,7 @@ class TestUnicode(unittest.TestCase):
     def test_decode_utf8(self):
         # Assert unicode.
         for s in self.strings:
-            self.assertTrue(isinstance(db.decode_utf8(s), unicode))
+            self.assertTrue(isinstance(db.decode_utf8(s), str))
         print("pattern.db.decode_utf8()")
 
     def test_encode_utf8(self):
@@ -645,9 +648,9 @@ class AbstractTestQuery(object):
     def _query(self, *args, **kwargs):
         """ Returns a pattern.db.Query object on a mock Table and Database.
         """
-        class Database:
+        class Database(object):
             escape, relations = lambda self, v: db._escape(v), []
-        class Table:
+        class Table(object):
             name, fields, db = "persons", ["id", "name", "age", "sex"], Database()
         return db.Query(Table(), *args, **kwargs)
         

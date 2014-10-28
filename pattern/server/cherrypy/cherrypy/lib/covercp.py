@@ -20,6 +20,7 @@ results in a web browser. If you run this module from the command line,
 it will call ``serve()`` for you.
 """
 from __future__ import division
+from future.builtins import object
 
 import re
 import sys
@@ -187,7 +188,7 @@ def _show_branch(root, base, path, pct=0, showpct=False, exclude="",
                  coverage=the_coverage):
 
     # Show the directory name and any of our children
-    dirs = [k for k, v in root.items() if v]
+    dirs = [k for k, v in list(root.items()) if v]
     dirs.sort()
     for name in dirs:
         newpath = os.path.join(path, name)
@@ -204,7 +205,7 @@ def _show_branch(root, base, path, pct=0, showpct=False, exclude="",
     # Now list the files
     if path.lower().startswith(base):
         relpath = path[len(base):]
-        files = [k for k, v in root.items() if not v]
+        files = [k for k, v in list(root.items()) if not v]
         files.sort()
         for name in files:
             newpath = os.path.join(path, name)

@@ -1,6 +1,11 @@
 #!/usr/bin/env python2
 from __future__ import print_function
 from __future__ import absolute_import
+from future.builtins import str
+from future.builtins import chr
+from future import standard_library
+standard_library.install_hooks()
+from future.builtins import object
 import sys
 import re
 from .utils import choplist
@@ -646,11 +651,11 @@ func/a/b{(c)do*}def
       ]
 
     def get_tokens(self, s):
-        import StringIO
+        import io
         class MyParser(PSBaseParser):
             def flush(self):
                 self.add_results(*self.popall())
-        parser = MyParser(StringIO.StringIO(s))
+        parser = MyParser(io.StringIO(s))
         r = []
         try:
             while 1:
@@ -660,11 +665,11 @@ func/a/b{(c)do*}def
         return r
 
     def get_objects(self, s):
-        import StringIO
+        import io
         class MyParser(PSStackParser):
             def flush(self):
                 self.add_results(*self.popall())
-        parser = MyParser(StringIO.StringIO(s))
+        parser = MyParser(io.StringIO(s))
         r = []
         try:
             while 1:

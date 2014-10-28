@@ -32,6 +32,7 @@ function to browse the results in a web browser. If you run this
 module from the command line, it will call ``serve()`` for you.
 
 """
+from future.builtins import object
 
 
 def new_func_strip_path(func_name):
@@ -149,7 +150,7 @@ class ProfileAggregator(Profiler):
         return result
 
 
-class make_app:
+class make_app(object):
     def __init__(self, nextapp, path=None, aggregate=False):
         """Make a WSGI middleware app which wraps 'nextapp' with profiling.
 

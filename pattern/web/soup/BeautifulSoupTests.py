@@ -5,6 +5,11 @@ These tests make sure the Beautiful Soup works as it should. If you
 find a bug in Beautiful Soup, the best way to express it is as a test
 case like this that fails."""
 from __future__ import absolute_import
+from future.builtins import chr
+from future.builtins import str
+from future import standard_library
+standard_library.install_hooks()
+from future.builtins import range
 
 import unittest
 from .BeautifulSoup import *
@@ -295,7 +300,7 @@ class PickleMeThis(SoupTest):
         self.assertEqual(str(copied), str(self.soup))
 
     def testUnicodePickle(self):
-        import cPickle as pickle
+        import pickle as pickle
         html = "<b>" + chr(0xc3) + "</b>"
         soup = BeautifulSoup(html)
         dumped = pickle.dumps(soup, pickle.HIGHEST_PROTOCOL)
@@ -653,18 +658,18 @@ class CleanupOnAisleFour(SoupTest):
         self.assertEquals(str(soup), "&lt;&lt;sacr&eacute; bleu!&gt;&gt;")
 
         soup = BeautifulStoneSoup(text, convertEntities=htmlEnt)
-        self.assertEquals(unicode(soup), u"&lt;&lt;sacr\xe9 bleu!&gt;&gt;")
+        self.assertEquals(str(soup), u"&lt;&lt;sacr\xe9 bleu!&gt;&gt;")
 
         # Make sure the "XML", "HTML", and "XHTML" settings work.
         text = "&lt;&trade;&apos;"
         soup = BeautifulStoneSoup(text, convertEntities=xmlEnt)
-        self.assertEquals(unicode(soup), u"&lt;&trade;'")
+        self.assertEquals(str(soup), u"&lt;&trade;'")
 
         soup = BeautifulStoneSoup(text, convertEntities=htmlEnt)
-        self.assertEquals(unicode(soup), u"&lt;\u2122&apos;")
+        self.assertEquals(str(soup), u"&lt;\u2122&apos;")
 
         soup = BeautifulStoneSoup(text, convertEntities=xhtmlEnt)
-        self.assertEquals(unicode(soup), u"&lt;\u2122'")
+        self.assertEquals(str(soup), u"&lt;\u2122'")
 
         invalidEntity = "foo&#bar;baz"
         soup = BeautifulStoneSoup\
@@ -682,7 +687,7 @@ class CleanupOnAisleFour(SoupTest):
     def testNonBreakingSpaces(self):
         soup = BeautifulSoup("<a>&nbsp;&nbsp;</a>",
                              convertEntities=BeautifulStoneSoup.HTML_ENTITIES)
-        self.assertEquals(unicode(soup), u"<a>\xa0\xa0</a>")
+        self.assertEquals(str(soup), u"<a>\xa0\xa0</a>")
 
     def testWhitespaceInDeclaration(self):
         self.assertSoupEquals('<! DOCTYPE>', '<!DOCTYPE>')
@@ -702,22 +707,22 @@ class CleanupOnAisleFour(SoupTest):
 
         soup = BeautifulSoup('<x t="&gt;&trade;">',
                              convertEntities=BeautifulStoneSoup.HTML_ENTITIES)
-        self.assertEquals(unicode(soup), u'<x t="&gt;\u2122"></x>')
+        self.assertEquals(str(soup), u'<x t="&gt;\u2122"></x>')
 
         uri = "http://crummy.com?sacr&eacute;&amp;bleu"
         link = '<a href="%s"></a>' % uri
         soup = BeautifulSoup(link)
-        self.assertEquals(unicode(soup), link)
+        self.assertEquals(str(soup), link)
         #self.assertEquals(unicode(soup.a['href']), uri)
 
         soup = BeautifulSoup(link, convertEntities=BeautifulSoup.HTML_ENTITIES)
-        self.assertEquals(unicode(soup),
+        self.assertEquals(str(soup),
                           link.replace("&eacute;", u"\xe9"))
 
         uri = "http://crummy.com?sacr&eacute;&bleu"
         link = '<a href="%s"></a>' % uri
         soup = BeautifulSoup(link, convertEntities=BeautifulSoup.HTML_ENTITIES)
-        self.assertEquals(unicode(soup.a['href']),
+        self.assertEquals(str(soup.a['href']),
                           uri.replace("&eacute;", u"\xe9"))
 
     def testNakedAmpersands(self):
@@ -746,11 +751,11 @@ class EncodeRed(SoupTest):
     def testUnicodeDammitStandalone(self):
         markup = "<foo>\x92</foo>"
         dammit = UnicodeDammit(markup)
-        self.assertEquals(dammit.unicode, "<foo>&#x2019;</foo>")
+        self.assertEquals(dammit.str, "<foo>&#x2019;</foo>")
 
         hebrew = "\xed\xe5\xec\xf9"
         dammit = UnicodeDammit(hebrew, ["iso-8859-8"])
-        self.assertEquals(dammit.unicode, u'\u05dd\u05d5\u05dc\u05e9')
+        self.assertEquals(dammit.str, u'\u05dd\u05d5\u05dc\u05e9')
         self.assertEquals(dammit.originalEncoding, 'iso-8859-8')
 
     def testGarbageInGarbageOut(self):
@@ -763,8 +768,8 @@ class EncodeRed(SoupTest):
         self.assertEquals(utf8, '<foo>\xc3\xbc</foo>')
 
         unicodeSoup = BeautifulStoneSoup(unicodeData)
-        self.assertEquals(unicodeData, unicode(unicodeSoup))
-        self.assertEquals(unicode(unicodeSoup.foo.string), u'\u00FC')
+        self.assertEquals(unicodeData, str(unicodeSoup))
+        self.assertEquals(str(unicodeSoup.foo.string), u'\u00FC')
 
         utf8Soup = BeautifulStoneSoup(utf8, fromEncoding='utf-8')
         self.assertEquals(utf8, str(utf8Soup))

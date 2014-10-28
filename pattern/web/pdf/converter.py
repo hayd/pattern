@@ -1,6 +1,8 @@
 #!/usr/bin/env python2
 from __future__ import print_function
 from __future__ import absolute_import
+from future.builtins import str
+from future.builtins import range
 import sys, os.path
 from .pdfdevice import PDFDevice, PDFTextDevice
 from .pdffont import PDFUnicodeNotDefined
@@ -89,7 +91,7 @@ class PDFLayoutAnalyzer(PDFTextDevice):
         # other shapes
         pts = []
         for p in path:
-            for i in xrange(1, len(p), 2):
+            for i in range(1, len(p), 2):
                 pts.append(apply_matrix_pt(self.ctm, (p[i], p[i+1])))
         self.cur_item.add(LTCurve(gstate.linewidth, pts))
         return
@@ -97,7 +99,7 @@ class PDFLayoutAnalyzer(PDFTextDevice):
     def render_char(self, matrix, font, fontsize, scaling, rise, cid):
         try:
             text = font.to_unichr(cid)
-            assert isinstance(text, unicode), text
+            assert isinstance(text, str), text
         except PDFUnicodeNotDefined:
             text = self.handle_undefined_char(font, cid)
         textwidth = font.char_width(cid)
@@ -257,7 +259,7 @@ class HTMLConverter(PDFConverter):
 
     def write_footer(self):
         self.write('<div style="position:absolute; top:0px;">Page: %s</div>\n' %
-                   ', '.join('<a href="#%s">%s</a>' % (i,i) for i in xrange(1,self.pageno)))
+                   ', '.join('<a href="#%s">%s</a>' % (i,i) for i in range(1,self.pageno)))
         self.write('</body></html>\n')
         return
 

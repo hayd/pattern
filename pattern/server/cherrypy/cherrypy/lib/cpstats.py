@@ -182,6 +182,8 @@ To format statistics reports:
 
 """
 from __future__ import division
+from future.builtins import next
+from future.builtins import object
 
 # -------------------------------- Statistics -------------------------------- #
 
@@ -580,7 +582,7 @@ table.stats2 th {
         """Return ([headers], [rows]) for the given collection."""
         # E.g., the 'Requests' dict.
         headers = []
-        for record in v.itervalues():
+        for record in v.values():
             for k3 in record:
                 format = formatting.get(k3, missing)
                 if format is None:

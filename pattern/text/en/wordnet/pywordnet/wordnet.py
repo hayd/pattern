@@ -38,6 +38,12 @@ clearly(adv.)
 from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
+from future.builtins import str
+from future.builtins import map
+from future.builtins import filter
+from past.builtins import cmp
+from future.builtins import range
+from future.builtins import object
 
 __author__  = "Oliver Steele <steele@osteele.com>"
 __version__ = "2.0.1"
@@ -184,7 +190,7 @@ VERB_FRAME_STRINGS = (
 #
 # Domain classes
 #
-class Word:
+class Word(object):
     """An index into the database.
     
     Each word has one or more Senses, which can be accessed via
@@ -214,7 +220,7 @@ class Word:
     def __init__(self, line):
         """Initialize the word from a line of a WN POS file."""
 	tokens = string.split(line)
-	ints = map(int, tokens[int(tokens[3]) + 4:])
+	ints = list(map(int, tokens[int(tokens[3]) + 4:]))
 	self.form = string.replace(tokens[0], '_', ' ')
         "Orthographic representation of the word."
 	self.pos = _normalizePOS(tokens[1])
@@ -273,7 +279,7 @@ class Word:
 	positions = {}
 	for sense in self.getSenses():
 	    positions[sense.position] = 1
-	return positions.keys()
+	return list(positions.keys())
 
     adjectivePositions = getAdjectivePositions # backwards compatability
     
@@ -309,7 +315,7 @@ class Word:
     #
     # Sequence protocol (a Word's elements are its Senses)
     #
-    def __nonzero__(self):
+    def __bool__(self):
 	return 1
     
     def __len__(self):
@@ -322,7 +328,7 @@ class Word:
 	return self.getSenses()[i:j]
 
 
-class Synset:
+class Synset(object):
     """A set of synonyms that share a common meaning.
     
     Each synonym contains one or more Senses, which represent a
@@ -371,7 +377,7 @@ class Synset:
 	if pos == VERB:
 	    (vfTuples, remainder) = _partition(remainder[1:], 3, int(remainder[0]))
 	    def extractVerbFrames(index, vfTuples):
-		return tuple(map(lambda t:string.atoi(t[1]), filter(lambda t,i=index:string.atoi(t[2],16) in (0, i), vfTuples)))
+		return tuple([string.atoi(t[1]) for t in list(filter(lambda t,i=index:string.atoi(t[2],16) in (0, i), vfTuples))])
 	    senseVerbFrames = []
 	    for index in range(1, len(self._senseTuples) + 1):
 		senseVerbFrames.append(extractVerbFrames(index, vfTuples))
@@ -422,7 +428,7 @@ class Synset:
 	    return self._pointers
 	else:
 	    _requirePointerType(pointerType)
-	    return filter(lambda pointer, type=pointerType: pointer.type == type, self._pointers)
+	    return list(filter(lambda pointer, type=pointerType: pointer.type == type, self._pointers))
 
     pointers = getPointers # backwards compatability
     
@@ -438,7 +444,7 @@ class Synset:
 	>>> N['dog'][0].getPointerTargets(HYPERNYM)
 	[{noun: canine, canid}]
 	"""
-	return map(Pointer.target, self.getPointers(pointerType))
+	return list(map(Pointer.target, self.getPointers(pointerType)))
 
     pointerTargets = getPointerTargets # backwards compatability
     
@@ -450,7 +456,7 @@ class Synset:
 	>>> N['dog'][1].isTagged()
 	0
 	"""
-	return len(filter(Sense.isTagged, self.getSenses())) > 0
+	return len(list(filter(Sense.isTagged, self.getSenses()))) > 0
     
     def __str__(self):
 	"""Return a human-readable representation.
@@ -458,7 +464,7 @@ class Synset:
 	>>> str(N['dog'][0].synset)
 	'{noun: dog, domestic dog, Canis familiaris}'
 	"""
-	return "{" + self.pos + ": " + string.joinfields(map(lambda sense:sense.form, self.getSenses()), ", ") + "}"
+	return "{" + self.pos + ": " + string.joinfields([sense.form for sense in self.getSenses()], ", ") + "}"
     
     def __repr__(self):
 	"""If ReadableRepresentations is true, return a human-readable
@@ -477,7 +483,7 @@ class Synset:
     #
     # Sequence protocol (a Synset's elements are its senses).
     #
-    def __nonzero__(self):
+    def __bool__(self):
 	return 1
     
     def __len__(self):
@@ -502,15 +508,15 @@ class Synset:
 	if isinstance(idx, Word):
 	    idx = idx.form
 	if isinstance(idx, StringType):
-	    idx = _index(idx, map(lambda sense:sense.form, senses)) or \
-		  _index(idx, map(lambda sense:sense.form, senses), _equalsIgnoreCase)
+	    idx = _index(idx, [sense.form for sense in senses]) or \
+		  _index(idx, [sense.form for sense in senses], _equalsIgnoreCase)
 	return senses[idx]
     
     def __getslice__(self, i, j):
 	return self.getSenses()[i:j]
 
 
-class Sense:
+class Sense(object):
     """A specific meaning of a specific word -- the intersection of a Word and a Synset.
     
     Fields
@@ -612,7 +618,7 @@ class Sense:
 	senseIndex = _index(self, self.synset.getSenses())
 	def pointsFromThisSense(pointer, selfIndex=senseIndex):
 	    return pointer.sourceIndex == 0 or pointer.sourceIndex - 1 == selfIndex
-	return filter(pointsFromThisSense, self.synset.getPointers(pointerType))
+	return list(filter(pointsFromThisSense, self.synset.getPointers(pointerType)))
 
     pointers = getPointers # backwards compatability
 
@@ -628,7 +634,7 @@ class Sense:
 	>>> N['dog'][0].getPointerTargets(HYPERNYM)
 	[{noun: canine, canid}]
 	"""
-	return map(Pointer.target, self.getPointers(pointerType))
+	return list(map(Pointer.target, self.getPointers(pointerType)))
 
     pointerTargets = getPointerTargets # backwards compatability
     
@@ -659,7 +665,7 @@ class Sense:
 	return _compareInstances(self, other, ('synset',)) or cmp(senseIndex(self), senseIndex(other))
 
 
-class Pointer:
+class Pointer(object):
     """ A typed directional relationship between Senses or Synsets.
     
     Fields
@@ -751,7 +757,7 @@ class Pointer:
 # Loading the lexnames
 # Klaus Ries <ries@cs.cmu.edu>
 
-class Lexname:
+class Lexname(object):
    dict = {}
    lexnames = []
    
@@ -775,7 +781,7 @@ setupLexnames()
 #
 # Dictionary
 #
-class Dictionary:
+class Dictionary(object):
     
     """A Dictionary contains all the Words in a given part of speech.
     This module defines four dictionaries, bound to N, V, ADJ, and ADV.
@@ -835,7 +841,7 @@ class Dictionary:
     #
     # Sequence protocol (a Dictionary's items are its Words)
     #
-    def __nonzero__(self):
+    def __bool__(self):
 	"""Return false.  (This is to avoid scanning the whole index file
 	to compute len when a Dictionary is used in test position.)
 	
@@ -904,7 +910,7 @@ class Dictionary:
     def keys(self):
 	"""Return a sorted list of strings that index words in this
 	dictionary."""
-	return self.indexFile.keys()
+	return list(self.indexFile.keys())
     
     def has_key(self, form):
 	"""Return true iff the argument indexes a word in this dictionary.
@@ -943,7 +949,7 @@ class Dictionary:
 	print("done.")
 
 
-class _IndexFile:
+class _IndexFile(object):
     """An _IndexFile is an implementation class that presents a
     Sequence and Dictionary interface to a sorted index file."""
     
@@ -972,7 +978,7 @@ class _IndexFile:
     #
     # Sequence protocol (an _IndexFile's items are its lines)
     #
-    def __nonzero__(self):
+    def __bool__(self):
 	return 1
     
     def __len__(self):
@@ -987,7 +993,7 @@ class _IndexFile:
 	    lines = lines + 1
 	return lines
     
-    def __nonzero__(self):
+    def __bool__(self):
 	return 1
     
     def __getitem__(self, index):
@@ -1025,7 +1031,7 @@ class _IndexFile:
     
     def keys(self):
 	if hasattr(self, 'indexCache'):
-	    keys = self.indexCache.keys()
+	    keys = list(self.indexCache.keys())
 	    keys.sort()
 	    return keys
 	else:
@@ -1251,7 +1257,7 @@ def _partition(sequence, size, count):
 # The LRUCache approximates a weak dict in the case where temporal
 # locality is good.
 
-class _LRUCache:
+class _LRUCache(object):
     """ A cache of values such that least recently used element is
     flushed when the cache fills.
     
@@ -1322,7 +1328,7 @@ class _LRUCache:
 	return value
 
 
-class _NullCache:
+class _NullCache(object):
     """A NullCache implements the Cache interface (the interface that
     LRUCache implements), but doesn't store any values."""
     

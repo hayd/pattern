@@ -1,3 +1,4 @@
+from future.builtins import range
 #### PATTERN | DE | INFLECT ########################################################################
 # -*- coding: utf-8 -*-
 # Copyright (c) 2012 University of Antwerp, Belgium

@@ -1,5 +1,7 @@
 from __future__ import division
 from __future__ import print_function
+from future.builtins import zip
+from future.builtins import range
 from util import *
 
 from pattern import metrics
@@ -273,7 +275,7 @@ class TestStatistics(unittest.TestCase):
             self.assertAlmostEqual(start + (stop-start)/2, i+1, places=3)
         # Assert 2 bins, one with all the low numbers, one with the high number.
         v = metrics.histogram([1,2,3,4,100], k=2)
-        v = sorted(v.values(), key=lambda item: len(item))
+        v = sorted(list(v.values()), key=lambda item: len(item))
         self.assertTrue(v[0] == [100])
         self.assertTrue(v[1] == [1,2,3,4])
         print("pattern.metrics.histogram()")

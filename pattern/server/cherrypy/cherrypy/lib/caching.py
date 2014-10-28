@@ -31,6 +31,8 @@ You may set any attribute, including overriding methods, on the cache
 instance by providing them in config. The above sets the
 :attr:`delay<cherrypy.lib.caching.MemoryCache.delay>` attribute, for example.
 """
+from future.builtins import str
+from future.builtins import object
 
 import datetime
 import sys
@@ -294,7 +296,7 @@ def get(invalid_methods=("POST", "PUT", "DELETE"), debug=False, **kwargs):
         cherrypy._cache = kwargs.pop("cache_class", MemoryCache)()
 
         # Take all remaining kwargs and set them on the Cache object.
-        for k, v in kwargs.items():
+        for k, v in list(kwargs.items()):
             setattr(cherrypy._cache, k, v)
         cherrypy._cache.debug = debug
 

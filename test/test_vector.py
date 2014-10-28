@@ -1,5 +1,7 @@
 from __future__ import division
 from __future__ import print_function
+from future.builtins import zip
+from future.builtins import range
 # -*- coding: utf-8 -*-
 from util import *
 
@@ -41,7 +43,7 @@ class TestUnicode(unittest.TestCase):
     def test_decode_utf8(self):
         # Assert unicode.
         for s in self.strings:
-            self.assertTrue(isinstance(vector.decode_utf8(s), unicode))
+            self.assertTrue(isinstance(vector.decode_utf8(s), str))
         print("pattern.vector.decode_utf8()")
 
     def test_encode_utf8(self):
@@ -210,12 +212,12 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(v5, "wolf*")
         self.assertEqual(v6, "wolf")
         # Assert unicode output.
-        self.assertTrue(isinstance(v1, unicode))
-        self.assertTrue(isinstance(v2, unicode))
-        self.assertTrue(isinstance(v3, unicode))
-        self.assertTrue(isinstance(v4, unicode))
-        self.assertTrue(isinstance(v5, unicode))
-        self.assertTrue(isinstance(v6, unicode))
+        self.assertTrue(isinstance(v1, str))
+        self.assertTrue(isinstance(v2, str))
+        self.assertTrue(isinstance(v3, str))
+        self.assertTrue(isinstance(v4, str))
+        self.assertTrue(isinstance(v5, str))
+        self.assertTrue(isinstance(v6, str))
         print("pattern.vector.stem()")
         
     def test_count(self):
@@ -311,7 +313,7 @@ class TestDocument(unittest.TestCase):
     def test_tf(self):
         # Assert Document.term_frequency() (= weights used in Vector for orphaned documents).
         v = vector.Document("the cat sat on the mat")
-        for feature, weight in v.vector.items():
+        for feature, weight in list(v.vector.items()):
             self.assertEqual(v.term_frequency(feature), weight)
             self.assertAlmostEqual(v.term_frequency(feature), 0.33, places=2)
         print("pattern.vector.Document.tf()")
@@ -767,7 +769,7 @@ class TestClustering(unittest.TestCase):
         # Assert iterator mean.
         self.assertEqual(vector.mean([], 0), 0)
         self.assertEqual(vector.mean([1,1.5,2], 3), 1.5)
-        self.assertEqual(vector.mean(xrange(4), 4), 1.5)
+        self.assertEqual(vector.mean(range(4), 4), 1.5)
         print("pattern.vector.mean()")
         
     def test_centroid(self):

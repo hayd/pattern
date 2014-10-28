@@ -1,3 +1,5 @@
+from future import standard_library
+standard_library.install_hooks()
 # -*- coding: utf-8 -*-
 import codecs
 import datetime
@@ -11,7 +13,7 @@ import time
 import warnings
 
 try:
-    from StringIO import StringIO
+    from io import StringIO
 except ImportError:
     from io import StringIO
 try:

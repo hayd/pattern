@@ -8,6 +8,8 @@ dispatcher as early as possible, passing it a 'path_info' argument.
 The default dispatcher discovers the page handler by matching path_info
 to a hierarchical arrangement of objects, starting at request.app.root.
 """
+from future.builtins import range
+from future.builtins import object
 
 import string
 import sys
@@ -88,7 +90,7 @@ def test_callable_spec(callable, callable_args, callable_kwargs):
         except IndexError:
             vararg_usage += 1
 
-    for key in callable_kwargs.keys():
+    for key in list(callable_kwargs.keys()):
         try:
             arg_usage[key] += 1
         except KeyError:
@@ -104,7 +106,7 @@ def test_callable_spec(callable, callable_args, callable_kwargs):
 
     missing_args = []
     multiple_args = []
-    for key, usage in arg_usage.items():
+    for key, usage in list(arg_usage.items()):
         if usage == 0:
             missing_args.append(key)
         elif usage > 1:

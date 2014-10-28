@@ -1,3 +1,6 @@
+from future.builtins import str
+from future import standard_library
+standard_library.install_hooks()
 import sys
 
 import cherrypy
@@ -7,7 +10,7 @@ def get_xmlrpclib():
     try:
         import xmlrpc.client as x
     except ImportError:
-        import xmlrpclib as x
+        import future.standard_library.xmlrpc.client as xmlrpc_client as x
     return x
 
 def process_body():

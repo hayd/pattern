@@ -6,6 +6,8 @@ it's a unicode string. But PEP 3333 says: "even if Python's str type is
 actually Unicode "under the hood", the content of native strings must
 still be translatable to bytes via the Latin-1 encoding!"
 """
+from builtins import next
+from builtins import object
 
 import sys as _sys
 
@@ -158,7 +160,7 @@ class _TrappedResponse(object):
             return self.trap(next, self.iter_response)
     else:
         def next(self):
-            return self.trap(self.iter_response.next)
+            return self.trap(self.iter_response.__next__)
 
     def close(self):
         if hasattr(self.response, 'close'):

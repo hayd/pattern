@@ -1,4 +1,6 @@
 from __future__ import print_function
+from __future__ import division
+from past.utils import old_div
 import os, sys; sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 import random
 
@@ -89,7 +91,7 @@ for score, review in data[1000:1500]:
 # study the documentation at:
 # http://www.clips.ua.ac.be/pages/pattern-metrics#accuracy
 
-print(float(i) / n)
+print(old_div(float(i), n))
 
 # The work is not done here.
 # Low accuracy is disappointing, but high accuracy is often suspicious.

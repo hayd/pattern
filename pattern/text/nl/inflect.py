@@ -73,7 +73,7 @@ def pluralize(word, pos=NOUN, custom={}):
         For example: stad => steden.
         The custom dictionary is for user-defined replacements.
     """
-    if word in custom.keys():
+    if word in list(custom.keys()):
         return custom[word]
     w = word.lower()
     if pos == NOUN:
@@ -136,10 +136,10 @@ def pluralize(word, pos=NOUN, custom={}):
 
 #### SINGULARIZE ###################################################################################
 
-singular_irregular = dict((v,k) for k,v in plural_irregular.items())
+singular_irregular = dict((v,k) for k,v in list(plural_irregular.items()))
 
 def singularize(word, pos=NOUN, custom={}):
-    if word in custom.keys():
+    if word in list(custom.keys()):
         return custom[word]
     w = word.lower()
     if pos == NOUN and w in singular_irregular:
@@ -376,7 +376,7 @@ def attributive(adjective):
         w = w + w[-1]
     return w + "e"
 
-adjective_predicative = dict((v,k) for k,v in adjective_attributive.items())
+adjective_predicative = dict((v,k) for k,v in list(adjective_attributive.items()))
 adjective_predicative.update({
           "moe": "moe",
         "taboe": "taboe",

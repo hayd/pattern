@@ -9,6 +9,13 @@
 
 from __future__ import with_statement
 from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import chr
+from builtins import zip
+from builtins import str
+from builtins import range
+from builtins import object
 
 import __main__
 import sys
@@ -16,7 +23,7 @@ import os
 import re
 import time; _time=time
 import atexit
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import hashlib
 import base64
 import random
@@ -32,17 +39,17 @@ import collections
 import sqlite3 as sqlite
 
 try: # Python 2.x vs 3.x
-    import htmlentitydefs
+    import html.entities
 except:
     from html import entities as htmlentitydefs
 
 try: # Python 2.x vs 3.x
-    from cStringIO import StringIO
+    from io import StringIO
 except:
     from io import BytesIO as StringIO
 
 try: # Python 2.x vs 3.x
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -88,7 +95,7 @@ def encode_entities(string):
         For example, to display "<em>hello</em>" in a browser,
         we need to pass "&lt;em&gt;hello&lt;/em&gt;" (otherwise "hello" in italic is displayed).
     """
-    if isinstance(string, basestring):
+    if isinstance(string, str):
         string = RE_AMPERSAND.sub("&amp;", string)
         string = string.replace("<", "&lt;")
         string = string.replace(">", "&gt;")
@@ -104,21 +111,21 @@ def decode_entities(string):
         hash, hex, name = match.group(1), match.group(2), match.group(3)
         if hash == "#" or name.isdigit():
             if hex == "":
-                return unichr(int(name))                 # "&#38;" => "&"
+                return chr(int(name))                 # "&#38;" => "&"
             if hex.lower() == "x":
-                return unichr(int("0x" + name, 16))      # "&#x0026;" = > "&"
+                return chr(int("0x" + name, 16))      # "&#x0026;" = > "&"
         else:
-            cp = htmlentitydefs.name2codepoint.get(name) # "&amp;" => "&"
-            return unichr(cp) if cp else match.group()   # "&foo;" => "&foo;"
-    if isinstance(string, basestring):
+            cp = html.entities.name2codepoint.get(name) # "&amp;" => "&"
+            return chr(cp) if cp else match.group()   # "&foo;" => "&foo;"
+    if isinstance(string, str):
         return RE_UNICODE.subn(replace_entity, string)[0]
     return string
 
 def encode_url(string):
-    return urllib.quote_plus(bytestring(string)) # "black/white" => "black%2Fwhite".
+    return urllib.parse.quote_plus(bytestring(string)) # "black/white" => "black%2Fwhite".
     
 def decode_url(string):
-    return urllib.unquote_plus(string)
+    return urllib.parse.unquote_plus(string)
 
 _TEMPORARY_FILES = []
 def openable(string, **kwargs):
@@ -150,7 +157,7 @@ def define(f):
     a = inspect.getargspec(f) # (names, *args, **kwargs, values)
     i = len(a[0]) - len(a[3] or [])
     x = tuple(a[0][:i])
-    y = dict(zip(a[0][i:], a[3] or []))
+    y = dict(list(zip(a[0][i:], a[3] or [])))
     x = x if not a[1] else True
     y = y if not a[2] else True
     return (f.__name__, type(f), x, y)
@@ -522,7 +529,7 @@ class Router(dict):
         """
         p = "/" + path.strip("/")
         p = p.lower()
-        p = p.encode("utf8") if isinstance(p, unicode) else p
+        p = p.encode("utf8") if isinstance(p, str) else p
         # Store the handler + its argument names (tuple(args), dict(kwargs)),
         # so that we can call this function without (all) keyword arguments,
         # if it does not take (all) query data.
@@ -540,7 +547,7 @@ class Router(dict):
         if not isinstance(path, tuple):
             path = path.strip("/").split("/") # ["api", "1", "en"]
         n = len(path)
-        for i in xrange(n + 1):
+        for i in range(n + 1):
             p0 = "/" + "/".join(path[:n-i])
             p0 = p0.lower()                   # "/api/1/en", "/api/1", "/api", ...
             p1 = path[n-i:]                   # [], ["en"], ["1", "en"], ...
@@ -564,7 +571,7 @@ class Router(dict):
                 if kwargs is True:
                     return handler(*p1, **data)
                 # Handler takes path and some query data.
-                return handler(*p1, **dict((k, v) for k, v in data.items() if k in kwargs))
+                return handler(*p1, **dict((k, v) for k, v in list(data.items()) if k in kwargs))
         # No handler.
         raise RouteError
 
@@ -647,11 +654,11 @@ class localdict(dict):
         self.__dict__.update(kwargs) # Attributes are global in every thread.
         
     def items(self):
-        return self._data.__dict__.items()
+        return list(self._data.__dict__.items())
     def keys(self):
-        return self._data.__dict__.keys()
+        return list(self._data.__dict__.keys())
     def values(self):
-        return self._data.__dict__.values()
+        return list(self._data.__dict__.values())
     def update(self, d):
         return self._data.__dict__.update(d)
     def clear(self):
@@ -686,7 +693,7 @@ class localdict(dict):
         return repr(self)
     def __repr__(self):
         return "localdict({%s})" % ", ".join(
-            ("%s: %s" % (repr(k), repr(v)) for k, v in self.items()))
+            ("%s: %s" % (repr(k), repr(v)) for k, v in list(self.items())))
 
 # Global alias for app.thread (Flask-style):
 g = localdict(data=cp.thread_data)
@@ -819,7 +826,7 @@ class Application(object):
             If the value is a generator, starts a stream.
             If the value is an iterable, joins the values with a space.
         """
-        if isinstance(v, basestring):
+        if isinstance(v, str):
             return v
         if isinstance(v, cp.lib.file_generator): # serve_file()
             return v
@@ -837,7 +844,7 @@ class Application(object):
         if v is None:
             return ""
         try: # (bool, int, float, object.__unicode__)
-            return unicode(v)
+            return str(v)
         except:
             return encode_entities(repr(v))
 
@@ -849,7 +856,7 @@ class Application(object):
         # pass it as a keyword argument named "db".
         # If there is a query parameter named "db",
         # it is overwritten (the reverse is not safe).
-        for k, v in g.items():
+        for k, v in list(g.items()):
             data[k] = v
         # Call the handler function for the given path.
         # Call @app.error(404) if no handler is found.
@@ -937,7 +944,7 @@ class Application(object):
             if code in ("*", None):
                 cp.config.update({"error_page.default": wrapper})
             # app.error(404) catches 404 error codes.
-            elif isinstance(code, (int, basestring)):
+            elif isinstance(code, (int, str)):
                 cp.config.update({"error_page.%s" % code: wrapper})
             # app.error((404, 500)) catches 404 + 500 error codes.
             elif isinstance(code, (tuple, list)):
@@ -1044,7 +1051,7 @@ class Application(object):
                 m.acquire_thread()
                 # If there is an app.thread.db connection,
                 # pass it as a keyword argument named "db".
-                return handler(**dict((k, v) for k, v in g.items() if k in kwargs))
+                return handler(**dict((k, v) for k, v in list(g.items()) if k in kwargs))
             p = cp.process.plugins.BackgroundTask(interval, wrapper)
             p.start()
             return handler
@@ -1337,7 +1344,7 @@ class Template(object):
         # "$i, $x" is mapped to {"i": 0, "x": 1}, {"i": 1, "x": 2}, ...
         # Nested tuples are not supported (e.g., "($i, ($k, $v))").
         k = [k.strip("$ ") for k in k.strip("()").split(",")]
-        return dict(zip(k, v if len(k) > 1 else [v]))
+        return dict(list(zip(k, v if len(k) > 1 else [v])))
 
     def _compile(self, string):
         """ Returns the template string as a (type, value, indent) list,
@@ -1437,7 +1444,7 @@ def template(string, *args, **kwargs):
     root, cached = (
         kwargs.pop("root", None),
         kwargs.pop("cached", None))
-    if root is None and len(args) > 0 and isinstance(args[0], basestring):
+    if root is None and len(args) > 0 and isinstance(args[0], str):
         root = args[0]
         args = args[1:]
     return Template(string, root, cached).render(*args, **kwargs)
@@ -1460,7 +1467,7 @@ def template(string, *args, **kwargs):
 #### HTML ##########################################################################################
 # Useful HTML generators.
 
-class HTML:
+class HTML(object):
     
     def _attrs(self, **kwargs):
         """ Returns a string of HTML element attributes.
@@ -1473,7 +1480,7 @@ class HTML:
             a.append("name=\"%s\"" % kwargs.pop("name"))
         if "css" in kwargs:
             a.append("class=\"%s\"" % kwargs.pop("css"))
-        for k, v in kwargs.items():
+        for k, v in list(kwargs.items()):
             a.append("%s=\"%s\"" % (k, v))
         return (" " + " ".join(a)).rstrip()
     

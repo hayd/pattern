@@ -1,3 +1,8 @@
+from __future__ import division
+from builtins import zip
+from builtins import range
+from builtins import object
+from past.utils import old_div
 #### PATTERN | METRICS #############################################################################
 # coding: utf-8
 # Copyright (c) 2010 University of Antwerp, Belgium
@@ -38,7 +43,7 @@ class Counter(dict):
         if kwargs:
             self.update(kwargs)
         if hasattr(iterable, "items"):
-            for k, v in iterable.items(): 
+            for k, v in list(iterable.items()): 
                 self[k] = self.get(k, 0) + v
         elif hasattr(iterable, "__getitem__") \
           or hasattr(iterable, "__iter__"):
@@ -49,8 +54,8 @@ class Counter(dict):
         """ Returns a list of the n most common (element, count)-tuples.
         """
         if n is None:
-            return sorted(self.items(), key=itemgetter(1), reverse=True)
-        return nlargest(n, self.items(), key=itemgetter(1))
+            return sorted(list(self.items()), key=itemgetter(1), reverse=True)
+        return nlargest(n, list(self.items()), key=itemgetter(1))
 
     def copy(self):
         return Counter(self)
@@ -155,16 +160,16 @@ def test(classify=lambda document:False, documents=[], average=None):
         With average=MACRO, precision & recall for positive and negative class are macro-averaged.
     """
     TP, TN, FP, FN = confusion_matrix(classify, documents)
-    A  = float(TP + TN) / ((TP + TN + FP + FN) or 1)
-    P1 = float(TP) / ((TP + FP) or 1) # positive class precision
-    R1 = float(TP) / ((TP + FN) or 1) # positive class recall
-    P0 = float(TN) / ((TN + FN) or 1) # negative class precision
-    R0 = float(TN) / ((TN + FP) or 1) # negative class recall
+    A  = old_div(float(TP + TN), ((TP + TN + FP + FN) or 1))
+    P1 = old_div(float(TP), ((TP + FP) or 1)) # positive class precision
+    R1 = old_div(float(TP), ((TP + FN) or 1)) # positive class recall
+    P0 = old_div(float(TN), ((TN + FN) or 1)) # negative class precision
+    R0 = old_div(float(TN), ((TN + FP) or 1)) # negative class recall
     if average is None:
         P, R = (P1, R1)
     if average == MACRO:
-        P, R = ((P1 + P0) / 2,
-                (R1 + R0) / 2)
+        P, R = (old_div((P1 + P0), 2),
+                old_div((R1 + R0), 2))
     F1 = 2 * P * R / ((P + R) or 1)
     return (A, P, R, F1)
 
@@ -206,7 +211,7 @@ def specificity(classify=lambda document:False, documents=[]):
     """ Returns the percentage of negative cases correctly classified as negative.
     """
     TP, TN, FP, FN = confusion_matrix(classify, documents)
-    return float(TN) / ((TN + FP) or 1)
+    return old_div(float(TN), ((TN + FP) or 1))
 
 TPR = sensitivity # true positive rate
 TNR = specificity # true negative rate
@@ -220,8 +225,8 @@ def roc(tests=[]):
         The x-axis represents FPR = the false positive rate (1 - specificity).
         The y-axis represents TPR = the true positive rate.
     """
-    x = FPR = lambda TP, TN, FP, FN: float(FP) / ((FP + TN) or 1)
-    y = TPR = lambda TP, TN, FP, FN: float(TP) / ((TP + FN) or 1)
+    x = FPR = lambda TP, TN, FP, FN: old_div(float(FP), ((FP + TN) or 1))
+    y = TPR = lambda TP, TN, FP, FN: old_div(float(TP), ((TP + FN) or 1))
     return sorted([(0.0, 0.0), (1.0, 1.0)] + [(x(*m), y(*m)) for m in tests])
 
 def auc(curve=[]):
@@ -258,13 +263,13 @@ def fleiss_kappa(m):
         return 1.0
     assert all(sum(row) == n for row in m[1:]), "numer of votes for each task differs"
     # p[j] = the proportion of all assignments which were to the j-th category.
-    p = [sum(m[i][j] for i in xrange(N)) / float(N*n) for j in xrange(k)]
+    p = [old_div(sum(m[i][j] for i in range(N)), float(N*n)) for j in range(k)]
     # P[i] = the extent to which voters agree for the i-th subject.
-    P = [(sum(m[i][j]**2 for j in xrange(k)) - n) / float(n * (n-1)) for i in xrange(N)]
+    P = [old_div((sum(m[i][j]**2 for j in range(k)) - n), float(n * (n-1))) for i in range(N)]
     # Pm = the mean of P[i] and Pe.
     Pe = sum(pj**2 for pj in p)
-    Pm = sum(P) / N
-    K = (Pm - Pe) / ((1 - Pe) or 1) # kappa
+    Pm = old_div(sum(P), N)
+    K = old_div((Pm - Pe), ((1 - Pe) or 1)) # kappa
     return K
     
 agreement = fleiss_kappa
@@ -283,10 +288,10 @@ def levenshtein(string1, string2):
     if n > m: 
         # Make sure n <= m to use O(min(n,m)) space.
         string1, string2, n, m = string2, string1, m, n
-    current = list(xrange(n+1))
-    for i in xrange(1, m+1):
+    current = list(range(n+1))
+    for i in range(1, m+1):
         previous, current = current, [i]+[0]*n
-        for j in xrange(1, n+1):
+        for j in range(1, n+1):
             insert, delete, replace = previous[j]+1, current[j-1]+1, previous[j-1]
             if string1[j-1] != string2[i-1]:
                 replace += 1
@@ -298,14 +303,14 @@ edit_distance = levenshtein
 def levenshtein_similarity(string1, string2):
     """ Returns the similarity of string1 and string2 as a number between 0.0 and 1.0.
     """
-    return 1 - levenshtein(string1, string2) / float(max(len(string1),  len(string2), 1.0))
+    return 1 - old_div(levenshtein(string1, string2), float(max(len(string1),  len(string2), 1.0)))
     
 def dice_coefficient(string1, string2):
     """ Returns the similarity between string1 and string1 as a number between 0.0 and 1.0,
         based on the number of shared bigrams, e.g., "night" and "nacht" have one common bigram "ht".
     """
     def bigrams(s):
-        return set(s[i:i+2] for i in xrange(len(s)-1))
+        return set(s[i:i+2] for i in range(len(s)-1))
     nx = bigrams(string1)
     ny = bigrams(string2)
     nt = nx.intersection(ny)
@@ -338,7 +343,7 @@ def flesch_reading_ease(string):
             n += int(v and not p)
             p = v
         return n
-    if not isinstance(string, basestring):
+    if not isinstance(string, str):
         raise TypeError("%s is not a string" % repr(string))
     if len(string) <  3:
         return 1.0
@@ -380,7 +385,7 @@ def ngrams(string, n=3, punctuation=PUNCTUATION, **kwargs):
     s = s.replace("!", " !")
     s = [w.strip(punctuation) for w in s.split()]
     s = [w.strip() for w in s if w.strip()]
-    return [tuple(s[i:i+n]) for i in xrange(len(s) - n + 1)]
+    return [tuple(s[i:i+n]) for i in range(len(s) - n + 1)]
 
 class Weight(float):
     """ A float with a magic "assessments" property,
@@ -397,7 +402,7 @@ class Weight(float):
     def __imul__(self, value):
         return Weight(self * value, self.assessments)
     def __idiv__(self, value):
-        return Weight(self / value, self.assessments)
+        return Weight(old_div(self, value), self.assessments)
 
 def intertextuality(texts=[], n=5, weight=lambda ngram: 1.0, **kwargs):
     """ Returns a dictionary of (i, j) => float.
@@ -436,7 +441,7 @@ def type_token_ratio(string, n=100, punctuation=PUNCTUATION):
     """
     def window(a, n=100):
         if n > 0:
-            for i in xrange(max(len(a) - n + 1, 1)):
+            for i in range(max(len(a) - n + 1, 1)):
                 yield a[i:i+n]
     s = string.lower().split()
     s = [w.strip(punctuation) for w in s]
@@ -470,10 +475,10 @@ def suffixes(inflections=[], n=3, top=10, reverse=True):
     # Sort by frequency of inflected suffix: 2x -nes, 1x -aux.
     # Sort by frequency of base suffixes for each inflection:
     # [(2, "nes", [("ne", 0.5), ("n", 0.5)]), (1, "aux", [("au", 1.0)])]
-    d = [(int(sum(y.values())), x, y.items()) for x, y in d.items()]
+    d = [(int(sum(y.values())), x, list(y.items())) for x, y in list(d.items())]
     d = sorted(d, reverse=True)
     d = ((n, x, (sorted(y, key=itemgetter(1)))) for n, x, y in d)
-    d = ((n, x, [(y, m / n) for y, m in y]) for n, x, y in d)
+    d = ((n, x, [(y, old_div(m, n)) for y, m in y]) for n, x, y in d)
     return list(d)[:top]
 
 #--- WORD CO-OCCURRENCE ----------------------------------------------------------------------------
@@ -507,7 +512,7 @@ def cooccurrence(iterable, window=(-1,-1), term1=lambda x: True, term2=lambda x:
     if not isinstance(matrix, dict):
         matrix = {}
     # Memory-efficient iteration:
-    if isinstance(iterable, basestring):
+    if isinstance(iterable, str):
         iterable = isplit(iterable)
     if isinstance(iterable, (list, tuple)) and all(hasattr(f, "read") for f in iterable):
         iterable = chain(*(isplit(chain(*x)) for x in iterable))
@@ -593,7 +598,7 @@ def smoothstep(a, b, x):
         return 0.0
     if x >= b: 
         return 1.0
-    x = float(x - a) / (b - a)
+    x = old_div(float(x - a), (b - a))
     return x * x * (3 - 2 * x)
 
 def smoothrange(a=None, b=None, n=10):
@@ -604,7 +609,7 @@ def smoothrange(a=None, b=None, n=10):
     def _multiple(v, round=False):
         e = floor(log(v, 10)) # exponent
         m = pow(10, e)        # magnitude
-        f = v / m             # fraction
+        f = old_div(v, m)             # fraction
         if round is True:
             op, x, y, z = lt, 1.5, 3.0, 7.0
         if round is False:
@@ -626,10 +631,10 @@ def smoothrange(a=None, b=None, n=10):
     if a == b:
         yield float(a); raise StopIteration
     r = _multiple(b - a)
-    t = _multiple(r / (n - 1), round=True)
-    a = floor(a / t) * t
-    b =  ceil(b / t) * t
-    for i in range(int((b - a) / t) + 1):
+    t = _multiple(old_div(r, (n - 1)), round=True)
+    a = floor(old_div(a, t)) * t
+    b =  ceil(old_div(b, t)) * t
+    for i in range(int(old_div((b - a), t)) + 1):
         yield a + i * t
 
 #### STATISTICS ####################################################################################
@@ -641,7 +646,7 @@ def mean(iterable):
         For example: mean([1,2,3,4]) = 10/4 = 2.5.
     """
     a = iterable if isinstance(iterable, list) else list(iterable)
-    return float(sum(a)) / (len(a) or 1)
+    return old_div(float(sum(a)), (len(a) or 1))
 
 avg = mean
 
@@ -649,7 +654,7 @@ def hmean(iterable):
     """ Returns the harmonic mean of the given list of values.
     """
     a = iterable if isinstance(iterable, list) else list(iterable)
-    return float(len(a)) / sum(1.0 / x for x in a)
+    return old_div(float(len(a)), sum(old_div(1.0, x) for x in a))
 
 def median(iterable, sort=True):
     """ Returns the value that separates the lower half from the higher half of values in the list.
@@ -659,7 +664,7 @@ def median(iterable, sort=True):
     if n == 0:
         raise ValueError("median() arg is an empty sequence")
     if n % 2 == 0:
-        return float(s[(n // 2) - 1] + s[n // 2]) / 2
+        return old_div(float(s[(n // 2) - 1] + s[n // 2]), 2)
     return s[n // 2]
 
 def variance(iterable, sample=False):
@@ -670,7 +675,7 @@ def variance(iterable, sample=False):
     # Population variance = E((xi-m)^2) / n
     a = iterable if isinstance(iterable, list) else list(iterable)
     m = mean(a)
-    return sum((x - m) ** 2 for x in a) / (len(a) - int(sample) or 1)
+    return old_div(sum((x - m) ** 2 for x in a), (len(a) - int(sample) or 1))
 
 def standard_deviation(iterable, *args, **kwargs):
     """ Returns the standard deviation of the given list of values.
@@ -685,11 +690,11 @@ def simple_moving_average(iterable, k=10):
     """ Returns an iterator over the simple moving average of the given list of values.
     """
     a = iterable if isinstance(iterable, list) else list(iterable)
-    for m in xrange(len(a)):
+    for m in range(len(a)):
         i = m - k
         j = m + k + 1
         w = a[max(0,i):j]
-        yield float(sum(w)) / (len(w) or 1)
+        yield old_div(float(sum(w)), (len(w) or 1))
       
 sma = simple_moving_average
 
@@ -704,10 +709,10 @@ def histogram(iterable, k=10, range=None):
     a = iterable if isinstance(iterable, list) else list(iterable)
     r = range or (min(a), max(a))
     k = max(int(k), 1)
-    w = float(r[1] - r[0] + 0.000001) / k # interval (bin width)
-    h = [[] for i in xrange(k)]
+    w = old_div(float(r[1] - r[0] + 0.000001), k) # interval (bin width)
+    h = [[] for i in range(k)]
     for x in a:
-        i = int(floor((x - r[0]) / w))
+        i = int(floor(old_div((x - r[0]), w)))
         if 0 <= i < len(h): 
             #print(x, i, "(%.2f, %.2f)" % (r[0] + w * i, r[0] + w + w * i))
             h[i].append(x)
@@ -723,7 +728,7 @@ def moment(iterable, n=2, sample=False):
         return 0.0
     a = iterable if isinstance(iterable, list) else list(iterable)
     m = mean(a)
-    return sum((x - m) ** n for x in a) / (len(a) - int(sample) or 1)
+    return old_div(sum((x - m) ** n for x in a), (len(a) - int(sample) or 1))
 
 def skewness(iterable, sample=False):
     """ Returns the degree of asymmetry of the given list of values:
@@ -734,7 +739,7 @@ def skewness(iterable, sample=False):
     # Distributions with skew and kurtosis between -1 and +1 
     # can be considered normal by approximation.
     a = iterable if isinstance(iterable, list) else list(iterable)
-    return moment(a, 3, sample) / (moment(a, 2, sample) ** 1.5 or 1)
+    return old_div(moment(a, 3, sample), (moment(a, 2, sample) ** 1.5 or 1))
 
 skew = skewness
 
@@ -746,7 +751,7 @@ def kurtosis(iterable, sample=False):
         =  -3 => flat
     """
     a = iterable if isinstance(iterable, list) else list(iterable)
-    return moment(a, 4, sample) / (moment(a, 2, sample) ** 2.0 or 1) - 3
+    return old_div(moment(a, 4, sample), (moment(a, 2, sample) ** 2.0 or 1)) - 3
 
 #a = 1
 #b = 1000
@@ -823,7 +828,7 @@ def fisher_exact_test(a, b, c, d, **kwargs):
             k = n - k
         if 0 <= k <= n and (n, k) not in _cache:
             c = 1.0
-            for i in xrange(1, int(k + 1)):
+            for i in range(1, int(k + 1)):
                 c *= n - k + i
                 c /= i
             _cache[(n, k)] = c # 3x speedup.
@@ -833,8 +838,8 @@ def fisher_exact_test(a, b, c, d, **kwargs):
     # Probabilities of "more extreme" data, in both directions (two-tailed).
     # Based on: http://www.koders.com/java/fid868948AD5196B75C4C39FEA15A0D6EAF34920B55.aspx?s=252
     s = [cutoff] + \
-        [p(a+i, b-i, c-i, d+i) for i in xrange(1, min(int(b), int(c)) + 1)] + \
-        [p(a-i, b+i, c+i, d-i) for i in xrange(1, min(int(a), int(d)) + 1)]
+        [p(a+i, b-i, c-i, d+i) for i in range(1, min(int(b), int(c)) + 1)] + \
+        [p(a-i, b+i, c+i, d-i) for i in range(1, min(int(a), int(d)) + 1)]
     return sum(v for v in s if v <= cutoff) or 0.0
     
 fisher = fisher_test = fisher_exact_test
@@ -852,12 +857,12 @@ def _expected(observed):
     if len(o) == 0:
         return []
     if len(o) == 1:
-        return [[sum(o[0]) / float(len(o[0]))] * len(o[0])]
-    n = [sum(o[i]) for i in xrange(len(o))]
-    m = [sum(o[i][j] for i in xrange(len(o))) for j in xrange(len(o[0]))]
+        return [[old_div(sum(o[0]), float(len(o[0])))] * len(o[0])]
+    n = [sum(o[i]) for i in range(len(o))]
+    m = [sum(o[i][j] for i in range(len(o))) for j in range(len(o[0]))]
     s = float(sum(n))
     # Each cell = row sum * column sum / total.
-    return [[n[i] * m[j] / s for j in xrange(len(o[i]))] for i in xrange(len(o))]
+    return [[n[i] * m[j] / s for j in range(len(o[i]))] for i in range(len(o))]
 
 def pearson_chi_squared_test(observed=[], expected=[], df=None, tail=UPPER):
     """ Returns (x2, p) for the n x m observed and expected data (containing absolute frequencies).
@@ -883,10 +888,10 @@ def pearson_chi_squared_test(observed=[], expected=[], df=None, tail=UPPER):
     df = df or (n-1) * (m-1)
     df = df or (m == 1 and n-1 or m-1)
     x2 = 0.0
-    for i in xrange(n):
-        for j in xrange(m):
+    for i in range(n):
+        for j in range(m):
             if o[i][j] != 0 and e[i][j] != 0:
-                x2 += (o[i][j] - e[i][j]) ** 2.0 / e[i][j]  
+                x2 += old_div((o[i][j] - e[i][j]) ** 2.0, e[i][j])  
     p = gammai(df * 0.5, x2 * 0.5, tail)
     return (x2, p)
     
@@ -917,10 +922,10 @@ def pearson_log_likelihood_ratio(observed=[], expected=[], df=None, tail=UPPER):
     df = df or (n-1) * (m-1)
     df = df or (m == 1 and n-1 or m-1)
     g  = 0.0
-    for i in xrange(n):
-        for j in xrange(m):
+    for i in range(n):
+        for j in range(m):
             if o[i][j] != 0 and e[i][j] != 0:
-                g += o[i][j] * log(o[i][j] / e[i][j])
+                g += o[i][j] * log(old_div(o[i][j], e[i][j]))
     g = g * 2
     p = gammai(df * 0.5, g * 0.5, tail)
     return (g, p)
@@ -951,13 +956,13 @@ def kolmogorov_smirnov_two_sample_test(a1, a2=NORMAL, n=1000):
     cdf1 = [bisect_right(a1, v) for v in a3] # [1, 2, 3, 2, 2, 3]
     cdf2 = [bisect_right(a2, v) for v in a3]
     # Cumulative distributions.
-    cdf1 = [v / n1 for v in cdf1]
-    cdf2 = [v / n2 for v in cdf2]
+    cdf1 = [old_div(v, n1) for v in cdf1]
+    cdf2 = [old_div(v, n2) for v in cdf2]
     # Compute maximum deviation between cumulative distributions.
     d = max(abs(v1 - v2) for v1, v2 in zip(cdf1, cdf2))
     # Compute p-value.
     e = sqrt(n1 * n2 / (n1 + n2))
-    p = kolmogorov((e + 0.12 + 0.11 / e) * d)
+    p = kolmogorov((e + 0.12 + old_div(0.11, e)) * d)
     return d, p
 
 ks2 = kolmogorov_smirnov_two_sample_test
@@ -980,15 +985,15 @@ def gammaln(x):
     y = x + 5.5
     y = (x + 0.5) * log(y) - y
     n = 1.0
-    for i in xrange(6):
+    for i in range(6):
         x += 1
-        n += (
+        n += old_div((
           76.18009173, 
          -86.50532033, 
           24.01409822, 
           -1.231739516e0, 
            0.120858003e-2, 
-          -0.536382e-5)[i] / x
+          -0.536382e-5)[i], x)
     return y + log(2.50662827465 * n)
 
 lgamma = gammaln
@@ -1000,9 +1005,9 @@ def gammai(a, x, tail=UPPER):
     # Series approximation.
     def _gs(a, x, epsilon=3.e-7, iterations=700):
         ln = gammaln(a)
-        s = 1.0 / a
-        d = 1.0 / a
-        for i in xrange(1, iterations):
+        s = old_div(1.0, a)
+        d = old_div(1.0, a)
+        for i in range(1, iterations):
             d = d * x / (a + i)
             s = s + d
             if abs(d) < abs(s) * epsilon:
@@ -1018,18 +1023,18 @@ def gammai(a, x, tail=UPPER):
         a1 = x
         b1 = 1.0
         f  = 1.0
-        for i in xrange(1, iterations):
+        for i in range(1, iterations):
             a0 = (a1 + a0 * (i - a)) * f
             b0 = (b1 + b0 * (i - a)) * f
             a1 = x * a0 + a1 * i * f
             b1 = x * b0 + b1 * i * f
             if a1 != 0.0:
-                f = 1.0 / a1
+                f = old_div(1.0, a1)
                 g = b1 * f
-                if abs((g - g0) / g) < epsilon:
+                if abs(old_div((g - g0), g)) < epsilon:
                     return (g * exp(-x + a * log(x) - ln), ln)
                 g0 = g
-        raise StopIteration(abs((g-g0) / g))
+        raise StopIteration(abs(old_div((g-g0), g)))
 
     if a <= 0.0:
         return 1.0
@@ -1056,7 +1061,7 @@ def erfc(x):
     """ Returns the complementary error function at x.
     """
     z = abs(x)
-    t = 1.0 / (1 + 0.5 * z)
+    t = old_div(1.0, (1 + 0.5 * z))
     r = 0.0
     for y in (
       0.17087277, 
@@ -1080,21 +1085,21 @@ def erfc(x):
 def cdf(x, mean=0.0, stdev=1.0):
     """ Returns the cumulative distribution function at x.
     """
-    return min(1.0, 0.5 * erfc((-x + mean) / (stdev * 2**0.5)))
+    return min(1.0, 0.5 * erfc(old_div((-x + mean), (stdev * 2**0.5))))
 
 def pdf(x, mean=0.0, stdev=1.0):
     """ Returns the probability density function at x:
         the likelihood of x in a distribution with given mean and standard deviation.
     """
-    u = float(x - mean) / abs(stdev)
-    return (1 / (sqrt(2*pi) * abs(stdev))) * exp(-u*u / 2)
+    u = old_div(float(x - mean), abs(stdev))
+    return (old_div(1, (sqrt(2*pi) * abs(stdev)))) * exp(-u*u / 2)
     
 normpdf = pdf
 
 def norm(n, mean=0.0, stdev=1.0):
     """ Returns a list of n random samples from the normal distribution.
     """
-    return [gauss(mean, stdev) for i in xrange(n)]
+    return [gauss(mean, stdev) for i in range(n)]
 
 #--- KOLMOGOROV DISTRIBUTION -----------------------------------------------------------------------
 # Based on: http://www.math.ucla.edu/~tom/distributions/Kolmogorov.html, Thomas Ferguson
@@ -1110,6 +1115,6 @@ def kolmogorov(x):
         return 0.0
     x = -2.0 * x * x
     k = 0
-    for i in reversed(xrange(1, 27+1, 2)): # 27 25 23 ... 1
+    for i in reversed(range(1, 27+1, 2)): # 27 25 23 ... 1
         k = (1 - k) * exp(x * i)
     return 2.0 * k

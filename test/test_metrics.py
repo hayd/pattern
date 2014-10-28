@@ -1,4 +1,8 @@
 from __future__ import print_function
+from __future__ import division
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 from util import *
 
 from pattern import metrics
@@ -33,13 +37,13 @@ class TestProfiling(unittest.TestCase):
     def test_accuracy(self):
         # Assert 2.0/3.0 (two out of three correct predictions).
         v = metrics.accuracy(lambda document: True, self.documents)
-        self.assertEqual(v, 2.0/3.0)
+        self.assertEqual(v, old_div(2.0,3.0))
         print("pattern.metrics.accuracy()")
 
     def test_precision(self):
         # Assert 2.0/3.0 (2 TP, 1 FP).
         v = metrics.precision(lambda document: True, self.documents)
-        self.assertEqual(v, 2.0/3.0)
+        self.assertEqual(v, old_div(2.0,3.0))
         # Assert 0.0 (no TP).
         v = metrics.precision(lambda document: False, self.documents)
         self.assertEqual(v, 0.0)
@@ -269,10 +273,10 @@ class TestStatistics(unittest.TestCase):
         v = metrics.histogram([1,2,3,4], k=4, range=(0.5,4.5))
         for i, ((start, stop), v) in enumerate(sorted(v.items())):
             self.assertTrue(i+1 == v[0])
-            self.assertAlmostEqual(start + (stop-start)/2, i+1, places=3)
+            self.assertAlmostEqual(start + old_div((stop-start),2), i+1, places=3)
         # Assert 2 bins, one with all the low numbers, one with the high number.
         v = metrics.histogram([1,2,3,4,100], k=2)
-        v = sorted(v.values(), key=lambda item: len(item))
+        v = sorted(list(v.values()), key=lambda item: len(item))
         self.assertTrue(v[0] == [100])
         self.assertTrue(v[1] == [1,2,3,4])
         print("pattern.metrics.histogram()")
@@ -302,7 +306,7 @@ class TestStatistics(unittest.TestCase):
         # Assert -1.2 for the uniform distribution.
         a = 1
         b = 1000
-        v = metrics.kurtosis([float(i-a)/(b-a) for i in range(a,b)])
+        v = metrics.kurtosis([old_div(float(i-a),(b-a)) for i in range(a,b)])
         self.assertAlmostEqual(v, -1.2, places=3)
         print("pattern.metrics.kurtosis()")
         

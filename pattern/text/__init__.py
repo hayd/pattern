@@ -1,4 +1,11 @@
 from __future__ import print_function
+from __future__ import division
+from builtins import str
+from builtins import map
+from builtins import zip
+from builtins import range
+from past.utils import old_div
+from builtins import object
 #### PATTERN | TEXT | PARSER #######################################################################
 # -*- coding: utf-8 -*-
 # Copyright (c) 2010 University of Antwerp, Belgium
@@ -37,7 +44,7 @@ DEFAULT = "default"
 def decode_string(v, encoding="utf-8"):
     """ Returns the given value as a Unicode string (if possible).
     """
-    if isinstance(encoding, basestring):
+    if isinstance(encoding, str):
         encoding = ((encoding,),) + (("windows-1252",), ("utf-8", "ignore"))
     if isinstance(v, str):
         for e in encoding:
@@ -45,14 +52,14 @@ def decode_string(v, encoding="utf-8"):
             except:
                 pass
         return v
-    return unicode(v)
+    return str(v)
 
 def encode_string(v, encoding="utf-8"):
     """ Returns the given value as a Python byte string (if possible).
     """
-    if isinstance(encoding, basestring):
+    if isinstance(encoding, str):
         encoding = ((encoding,),) + (("windows-1252",), ("utf-8", "ignore"))
-    if isinstance(v, unicode):
+    if isinstance(v, str):
         for e in encoding:
             try: return v.encode(*e)
             except:
@@ -77,7 +84,7 @@ def ngrams(string, n=3, punctuation=PUNCTUATION, continuous=False):
         return []
     if isinstance(string, list):
         s = [strip_punctuation(string)]
-    if isinstance(string, basestring):
+    if isinstance(string, str):
         s = [strip_punctuation(s.split(" ")) for s in tokenize(string)]
     if isinstance(string, Sentence):
         s = [strip_punctuation(string)]
@@ -113,7 +120,7 @@ def pprint(string, token=[WORD, POS, CHUNK, PNP], column=4):
     """ Pretty-prints the output of Parser.parse() as a table with outlined columns.
         Alternatively, you can supply a tree.Text or tree.Sentence object.
     """
-    if isinstance(string, basestring):
+    if isinstance(string, str):
         print("\n\n".join([table(sentence, fill=column) for sentence in Text(string, token)]))
     if isinstance(string, Text):
         print("\n\n".join([table(sentence, fill=column) for sentence in string]))
@@ -306,10 +313,10 @@ def _read(path, encoding="utf-8", comment=";;;"):
         strippping comments and decoding each line to Unicode.
     """
     if path:
-        if isinstance(path, basestring) and os.path.exists(path):
+        if isinstance(path, str) and os.path.exists(path):
             # From file path.
             f = open(path, "rb")
-        elif isinstance(path, basestring):
+        elif isinstance(path, str):
             # From string.
             f = path.splitlines()
         else:
@@ -702,7 +709,7 @@ class Entities(lazydict):
         """ Appends a named entity to the lexicon,
             e.g., Entities.append("Hooloovoo", "PERS")
         """
-        e = map(lambda s: s.lower(), entity.split(" ") + [name])
+        e = [s.lower() for s in entity.split(" ") + [name]]
         self.setdefault(e[0], []).append(e)
 
     def extend(self, entities):
@@ -767,7 +774,7 @@ class Parser(object):
         self.default    = default
         self.language   = language
         # Load data.
-        f = lambda s: isinstance(s, basestring) or hasattr(s, "read")
+        f = lambda s: isinstance(s, str) or hasattr(s, "read")
         if f(lexicon):
             # Known words.
             self.lexicon = Lexicon(path=lexicon)
@@ -865,8 +872,8 @@ class Parser(object):
         if tokenize is True:
             s = self.find_tokens(s, **kwargs)
         if isinstance(s, (list, tuple)):
-            s = [isinstance(s, basestring) and s.split(" ") or s for s in s]
-        if isinstance(s, basestring):
+            s = [isinstance(s, str) and s.split(" ") or s for s in s]
+        if isinstance(s, str):
             s = [s.split(" ") for s in s.split("\n")]
         # Unicode.
         for i in range(len(s)):
@@ -923,20 +930,20 @@ class Parser(object):
 
 TOKENS = "tokens"
 
-class TaggedString(unicode):
+class TaggedString(str):
 
     def __new__(self, string, tags=["word"], language=None):
         """ Unicode string with tags and language attributes.
             For example: TaggedString("cat/NN/NP", tags=["word", "pos", "chunk"]).
         """
         # From a TaggedString:
-        if isinstance(string, unicode) and hasattr(string, "tags"):
+        if isinstance(string, str) and hasattr(string, "tags"):
             tags, language = string.tags, string.language
         # From a TaggedString.split(TOKENS) list:
         if isinstance(string, list):
             string = [[[x.replace("/", "&slash;") for x in token] for token in s] for s in string]
             string = "\n".join(" ".join("/".join(token) for token in s) for s in string)
-        s = unicode.__new__(self, string)
+        s = str.__new__(self, string)
         s.tags = list(tags)
         s.language = language
         return s
@@ -946,12 +953,12 @@ class TaggedString(unicode):
             where each token is a list of word + tags.
         """
         if sep != TOKENS:
-            return unicode.split(self, sep)
+            return str.split(self, sep)
         if len(self) == 0:
             return []
         return [[[x.replace("&slash;", "/") for x in token.split("/")]
             for token in sentence.split(" ")]
-                for sentence in unicode.split(self, "\n")]
+                for sentence in str.split(self, "\n")]
 
 #--- UNIVERSAL TAGSET ------------------------------------------------------------------------------
 # The default part-of-speech tagset used in Pattern is Penn Treebank II.
@@ -1054,7 +1061,7 @@ emoticons = { # (facial expression, sentiment)-keys
     ("cry"  , -1.00): set((":'(", ":'''(", ";'("))
 }
 
-RE_EMOTICONS = [r" ?".join(map(re.escape, e)) for v in EMOTICONS.values() for e in v]
+RE_EMOTICONS = [r" ?".join(map(re.escape, e)) for v in list(EMOTICONS.values()) for e in v]
 RE_EMOTICONS = re.compile(r"(%s)($|\s)" % "|".join(RE_EMOTICONS))
 
 # Common emoji.
@@ -1072,7 +1079,7 @@ emoji = { # (facial expression, sentiment)-keys
     ("cry"  , -1.00): set((u"😢", u"😥", u"😓", u"😪", u"😭", u"😿")), 
 }
 
-RE_EMOJI = [e for v in EMOJI.values() for e in v]
+RE_EMOJI = [e for v in list(EMOJI.values()) for e in v]
 RE_EMOJI = re.compile(r"(\s?)(%s)(\s?)" % "|".join(RE_EMOJI))
 
 # Mention marker: "@tomdesmedt".
@@ -1094,10 +1101,10 @@ def find_tokens(string, punctuation=PUNCTUATION, abbreviations=ABBREVIATIONS, re
     # Handle punctuation.
     punctuation = tuple(punctuation)
     # Handle replacements (contractions).
-    for a, b in replace.items():
+    for a, b in list(replace.items()):
         string = re.sub(a, b, string)
     # Handle Unicode quotes.
-    if isinstance(string, unicode):
+    if isinstance(string, str):
         string = string.replace(u"“", u" “ ")
         string = string.replace(u"”", u" ” ")
         string = string.replace(u"‘", u" ‘ ")
@@ -1139,7 +1146,7 @@ def find_tokens(string, punctuation=PUNCTUATION, abbreviations=ABBREVIATIONS, re
                 tokens.append(t)
             tokens.extend(reversed(tail))
     # Handle citations (periods + quotes).
-    if isinstance(string, unicode):
+    if isinstance(string, str):
         quotes = ("'", "\"", u"”", u"’")
     else:
         quotes = ("'", "\"")    
@@ -1319,7 +1326,7 @@ def find_chunks(tagged, language="en"):
                     else:
                         chunked[k].append("I-" + tag)
     # Mark chinks (tokens outside of a chunk) with O-.
-    for chink in filter(lambda x: len(x) < 3, chunked):
+    for chink in [x for x in chunked if len(x) < 3]:
         chink.append("O")
     # Post-processing corrections.
     for i, (word, tag, chunk) in enumerate(chunked):
@@ -1483,9 +1490,9 @@ def find_keywords(string, parser, top=10, frequency={}, ignore=("rt",), pos=("NN
             # 4) words that are not in a prepositional phrase.
             # 5) words that are the head of a chunk.
             noun = w[1].startswith("NN")
-            m[k][0] += 1 / float(n)
+            m[k][0] += old_div(1, float(n))
             m[k][1] |= 1 if len(ctx[w[0]]) > 1 else 0
-            m[k][2] |= 1 if i / float(len(t)) <= 0.25 else 0
+            m[k][2] |= 1 if old_div(i, float(len(t))) <= 0.25 else 0
             m[k][3] |= 1 if noun else 0
             m[k][4] |= 1 if noun and w[3].startswith("O") else 0
             m[k][5] |= 1 if noun and w == head else 0
@@ -1495,13 +1502,13 @@ def find_keywords(string, parser, top=10, frequency={}, ignore=("rt",), pos=("NN
             if not k.isalpha(): # @username, odd!ti's
                 df = 1.0
             else:
-                df = 1.0 / max(frequency.get(w[0].lower(), frequency.get(k, 0)), 0.0001)
+                df = old_div(1.0, max(frequency.get(w[0].lower(), frequency.get(k, 0)), 0.0001))
                 df = log(df)
             m[k][0] *= df
             #print k, m[k]
     # Sort candidates alphabetically by total score.
     # The harmonic mean will emphasize tf-idf score.
-    hmean = lambda a: len(a) / sum(1.0 / (x or 0.0001) for x in a)
+    hmean = lambda a: old_div(len(a), sum(old_div(1.0, (x or 0.0001)) for x in a))
     m = [(hmean(m[k]), k) for k in m]
     m = sorted(m, key=lambda x: x[1])
     m = sorted(m, key=lambda x: x[0], reverse=True)
@@ -1710,7 +1717,7 @@ TENSES = {
 # -  Penn treebank: "VBP" => 1st person singular present.
 TENSES_ID = {}
 TENSES_ID[INFINITIVE] = 0
-for i, (tense, person, number, mood, aspect, negated, aliases) in TENSES.items():
+for i, (tense, person, number, mood, aspect, negated, aliases) in list(TENSES.items()):
     for a in aliases + (i,):
         TENSES_ID[i] = \
         TENSES_ID[a] = \
@@ -1845,8 +1852,8 @@ class Verbs(lazydict):
             Each tense is a (tense, person, number, mood, aspect)-tuple.
         """
         a = set(TENSES[id] for id in self._format)
-        a = a.union(set(TENSES[id] for id in self._default.keys()))
-        a = a.union(set(TENSES[id] for id in self._default.values()))
+        a = a.union(set(TENSES[id] for id in list(self._default.keys())))
+        a = a.union(set(TENSES[id] for id in list(self._default.values())))
         a = sorted(x[:-2] for x in a if x[-2] is False) # Exclude negation.
         return a
 
@@ -1919,13 +1926,13 @@ class Verbs(lazydict):
         # 2) retrieve the tense tuples for which that tense is a default.
         for i, tense in enumerate(v):
             if tense == verb:
-                for id, index in self._format.items():
+                for id, index in list(self._format.items()):
                     if i == index:
                         a.add(id)
-                for id1, id2 in self._default.items():
+                for id1, id2 in list(self._default.items()):
                     if id2 in a:
                         a.add(id1)
-                for id1, id2 in self._default.items():
+                for id1, id2 in list(self._default.items()):
                     if id2 in a:
                         a.add(id1)
         a = (TENSES[id][:-2] for id in a)
@@ -1976,7 +1983,7 @@ NOUN, VERB, ADJECTIVE, ADVERB = \
 RE_SYNSET = re.compile(r"^[acdnrv][-_][0-9]+$")
 
 def avg(list):
-    return sum(list) / float(len(list) or 1)
+    return old_div(sum(list), float(len(list) or 1))
 
 class Score(tuple):
 
@@ -2055,13 +2062,13 @@ class Sentiment(lazydict):
         self._language = xml.attrib.get("language", self._language)
         # Average scores of all word senses per part-of-speech tag.
         for w in words:
-            words[w] = dict((pos, map(avg, zip(*psi))) for pos, psi in words[w].items())
+            words[w] = dict((pos, list(map(avg, list(zip(*psi))))) for pos, psi in list(words[w].items()))
         # Average scores of all part-of-speech tags.
-        for w, pos in words.items():
-            words[w][None] = map(avg, zip(*pos.values()))
+        for w, pos in list(words.items()):
+            words[w][None] = list(map(avg, list(zip(*list(pos.values())))))
         # Average scores of all synonyms per synset.
-        for id, psi in synsets.items():
-            synsets[id] = map(avg, zip(*psi))
+        for id, psi in list(synsets.items()):
+            synsets[id] = list(map(avg, list(zip(*psi))))
         dict.update(self, words)
         dict.update(self.labeler, labels)
         dict.update(self._synsets, synsets)
@@ -2101,7 +2108,7 @@ class Sentiment(lazydict):
                 w = weighted(words)
                 s += w * score
                 n += w
-            return s / float(n or 1)
+            return old_div(s, float(n or 1))
         ngrams = ngrams if ngrams != DEFAULT else self.ngrams
         # A pattern.en.wordnet.Synset.
         # Sentiment(synsets("horrible", "JJ")[0]) => (-0.6, 1.0)
@@ -2110,11 +2117,11 @@ class Sentiment(lazydict):
         # A synset id.
         # Sentiment("a-00193480") => horrible => (-0.6, 1.0)   (English WordNet)
         # Sentiment("c_267") => verschrikkelijk => (-0.9, 1.0) (Dutch Cornetto)
-        elif isinstance(s, basestring) and RE_SYNSET.match(s):
+        elif isinstance(s, str) and RE_SYNSET.match(s):
             a = [(s.synonyms[0],) + self.synset(s.id, pos=s.pos) + (None,)]
         # A string of words.
         # Sentiment("a horrible movie") => (-0.6, 1.0)
-        elif isinstance(s, basestring):
+        elif isinstance(s, str):
             a = self.assessments(((w.lower(), None) for w in " ".join(self.tokenizer(s)).split()), negation, ngrams)
         # A pattern.en.Text.
         elif hasattr(s, "sentences"):
@@ -2143,8 +2150,8 @@ class Sentiment(lazydict):
             a = []
         weight = kwargs.get("weight", lambda w: 1)
         # Each "w" in "a" is a (words, polarity, subjectivity, label)-tuple.
-        return Score(polarity = avg(map(lambda w: (w[0], w[1]), a), weight),
-                 subjectivity = avg(map(lambda w: (w[0], w[2]), a), weight),
+        return Score(polarity = avg([(w[0], w[1]) for w in a], weight),
+                 subjectivity = avg([(w[0], w[2]) for w in a], weight),
                   assessments = a)
 
     def assessments(self, words=[], negation=True, ngrams=DEFAULT):
@@ -2165,7 +2172,7 @@ class Sentiment(lazydict):
             if w is None:
                 index += 1
                 continue
-            for i in reversed(range(1, max(1, ngrams))):
+            for i in reversed(list(range(1, max(1, ngrams)))):
                 # Known idioms ("hit the spot").
                 if index < len(words) - i:
                     idiom = words[index:index+i+1]
@@ -2189,7 +2196,7 @@ class Sentiment(lazydict):
                 # Known word preceded by a negation ("not really good").
                 if n is not None:
                     a[-1]["w"].insert(0, n)
-                    a[-1]["i"] = 1.0 / a[-1]["i"]
+                    a[-1]["i"] = old_div(1.0, a[-1]["i"])
                     a[-1]["n"] = -1
                 # Known word may be a negation.
                 # Known word may be modifying the next word (i.e., it is a known adverb).
@@ -2224,8 +2231,8 @@ class Sentiment(lazydict):
                 # EMOTICONS: {("grin", +1.0): set((":-D", ":D"))}
                 if w.isalpha() is False and len(w) <= 5 and w not in PUNCTUATION: # speedup
                     for E in (EMOTICONS, EMOJI):
-                        for (type, p), e in E.items():
-                            if w in map(lambda e: e.lower(), e):
+                        for (type, p), e in list(E.items()):
+                            if w in [e.lower() for e in e]:
                                 a.append(dict(w=[w], p=p, s=1.0, i=1.0, n=1, x=MOOD))
                                 break
             index += 1
@@ -2257,7 +2264,7 @@ class Sentiment(lazydict):
         a.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>")
         a.append("<sentiment>")
         for w in sorted(self):
-            for pos, (p, s, i) in self[w].items():
+            for pos, (p, s, i) in list(self[w].items()):
                 pos = pos or ""
                 if pos or len(self[w]) == 1:
                     a.append("\t<word %s %s %s %s %s %s />" % (
@@ -2354,7 +2361,7 @@ class Spelling(lazydict):
                   or [w]
         candidates = [(self.get(c, 0.0), c) for c in candidates]
         s = float(sum(p for p, w in candidates) or 1)
-        candidates = sorted(((p / s, w) for p, w in candidates), reverse=True)
+        candidates = sorted(((old_div(p, s), w) for p, w in candidates), reverse=True)
         candidates = [(w.istitle() and x.title() or x, p) for p, x in candidates] # case-sensitive
         return candidates
 
@@ -2387,8 +2394,8 @@ def language(s):
     p = {}
     for xx in LANGUAGES:
         lexicon = _module(xx).__dict__["lexicon"]
-        p[xx] = sum(1 for w in s if w in lexicon) / n
-    return max(p.items(), key=lambda kv: (kv[1], int(kv[0] == "en")))
+        p[xx] = old_div(sum(1 for w in s if w in lexicon), n)
+    return max(list(p.items()), key=lambda kv: (kv[1], int(kv[0] == "en")))
     
 lang = language
 

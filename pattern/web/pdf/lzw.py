@@ -1,10 +1,15 @@
 #!/usr/bin/env python2
 from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import chr
+from builtins import range
+from builtins import object
 import sys
 try:
-    from cStringIO import StringIO
+    from io import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from io import StringIO
 
 
 ##  LZWDecoder
@@ -49,7 +54,7 @@ class LZWDecoder(object):
     def feed(self, code):
         x = ''
         if code == 256:
-            self.table = [ chr(c) for c in xrange(256) ] # 0-255
+            self.table = [ chr(c) for c in range(256) ] # 0-255
             self.table.append(None) # 256
             self.table.append(None) # 257
             self.prevbuf = ''

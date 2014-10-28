@@ -1,4 +1,9 @@
 from __future__ import print_function
+from __future__ import division
+from builtins import next
+from builtins import str
+from builtins import range
+from past.utils import old_div
 # -*- coding: utf-8 -*-
 from util import *
 
@@ -42,7 +47,7 @@ class TestInflection(unittest.TestCase):
             if en.inflect.pluralize(sg) == pl:
                 i +=1
             n += 1
-        self.assertTrue(float(i) / n > 0.95)
+        self.assertTrue(old_div(float(i), n) > 0.95)
         print("pattern.en.inflect.pluralize()")
 
     def test_singularize(self):
@@ -53,7 +58,7 @@ class TestInflection(unittest.TestCase):
             if en.inflect.singularize(pl) == sg:
                 i +=1
             n += 1
-        self.assertTrue(float(i) / n > 0.95)
+        self.assertTrue(old_div(float(i), n) > 0.95)
         print("pattern.en.inflect.singularize()")
 
     def test_find_lemma(self):
@@ -61,17 +66,17 @@ class TestInflection(unittest.TestCase):
         # Note: the accuracy is higher (95%) when measured on CELEX word forms
         # (probably because en.verbs has high percentage irregular verbs).
         i, n = 0, 0
-        for v1, v2 in en.inflect.verbs.inflections.items():
+        for v1, v2 in list(en.inflect.verbs.inflections.items()):
             if en.inflect.verbs.find_lemma(v1) == v2:
                 i += 1
             n += 1
-        self.assertTrue(float(i) / n > 0.90)
+        self.assertTrue(old_div(float(i), n) > 0.90)
         print("pattern.en.inflect.verbs.find_lemma()")
 
     def test_find_lexeme(self):
         # Assert the accuracy of the verb conjugation algorithm.
         i, n = 0, 0
-        for v, lexeme1 in en.inflect.verbs.infinitives.items():
+        for v, lexeme1 in list(en.inflect.verbs.infinitives.items()):
             lexeme2 = en.inflect.verbs.find_lexeme(v)
             for j in range(len(lexeme2)):
                 if lexeme1[j] == lexeme2[j] or \
@@ -79,7 +84,7 @@ class TestInflection(unittest.TestCase):
                    lexeme1[j>5 and 10 or 0] == lexeme2[j]:
                     i += 1
                 n += 1
-        self.assertTrue(float(i) / n > 0.90)
+        self.assertTrue(old_div(float(i), n) > 0.90)
         print("pattern.en.inflect.verbs.find_lexeme()")
 
     def test_conjugate(self):
@@ -276,7 +281,7 @@ class TestSpelling(unittest.TestCase):
                     i += 1
                 else:
                     j += 1
-        self.assertTrue(i / (i+j) > 0.70)
+        self.assertTrue(old_div(i, (i+j)) > 0.70)
         print("pattern.en.suggest()")
 
 #---------------------------------------------------------------------------------------------------
@@ -311,7 +316,7 @@ class TestParser(unittest.TestCase):
                     if function([word, "NN"])[1].startswith(tag):
                         i += 1
                     n += 1
-            scores.append(float(i) / n)
+            scores.append(old_div(float(i), n))
         return scores
 
     def test_default_suffix_rules(self):
@@ -510,12 +515,12 @@ class TestParser(unittest.TestCase):
             "mice/NNS/B-NP/O/mouse ././O/O/."
         )
         # 4) Assert unicode.
-        self.assertTrue(isinstance(v, unicode))
+        self.assertTrue(isinstance(v, str))
         # 5) Assert unicode for faulty input (bytestring with unicode characters).
-        self.assertTrue(isinstance(en.parse("ø ü"), unicode))
-        self.assertTrue(isinstance(en.parse("ø ü", tokenize=True,  tags=False, chunks=False), unicode))
-        self.assertTrue(isinstance(en.parse("ø ü", tokenize=False, tags=False, chunks=False), unicode))
-        self.assertTrue(isinstance(en.parse("o u", encoding="ascii"), unicode))
+        self.assertTrue(isinstance(en.parse("ø ü"), str))
+        self.assertTrue(isinstance(en.parse("ø ü", tokenize=True,  tags=False, chunks=False), str))
+        self.assertTrue(isinstance(en.parse("ø ü", tokenize=False, tags=False, chunks=False), str))
+        self.assertTrue(isinstance(en.parse("o u", encoding="ascii"), str))
         # 6) Assert optional parameters (i.e., setting all to False).
         self.assertEqual(en.parse("ø ü.", tokenize=True,  tags=False, chunks=False), u"ø ü .")
         self.assertEqual(en.parse("ø ü.", tokenize=False, tags=False, chunks=False), u"ø ü.")
@@ -533,7 +538,7 @@ class TestParser(unittest.TestCase):
                         i += 1
                     n += 1
             #print(corpus, float(i) / n)
-            self.assertTrue(float(i) / n > (en.parser.model and a[0] or a[1]))
+            self.assertTrue(old_div(float(i), n) > (en.parser.model and a[0] or a[1]))
         print("pattern.en.parse()")
 
     def test_tagged_string(self):
@@ -633,8 +638,8 @@ class TestParseTree(unittest.TestCase):
         self.assertTrue(v.objects  == [self.text[0].chunks[2]])
         self.assertTrue(v.nouns    == [self.text[0].words[3], self.text[0].words[6]])
         # Sentence.string must be unicode.
-        self.assertTrue(isinstance(v.string, unicode) == True)
-        self.assertTrue(isinstance(unicode(v), unicode) == True)
+        self.assertTrue(isinstance(v.string, str) == True)
+        self.assertTrue(isinstance(str(v), str) == True)
         self.assertTrue(isinstance(str(v), str) == True)
         print("pattern.en.Sentence")
 

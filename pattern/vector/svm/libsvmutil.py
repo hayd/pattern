@@ -2,6 +2,9 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+from __future__ import division
+from builtins import zip
+from past.utils import old_div
 from .libsvm import *
 
 import os, sys
@@ -72,9 +75,9 @@ def evaluations(ty, pv):
 		sumvy += v*y 
 	l = len(ty)
 	ACC = 100.0*total_correct/l
-	MSE = total_error/l
+	MSE = old_div(total_error,l)
 	try:
-		SCC = ((l*sumvy-sumv*sumy)*(l*sumvy-sumv*sumy))/((l*sumvv-sumv*sumv)*(l*sumyy-sumy*sumy))
+		SCC = old_div(((l*sumvy-sumv*sumy)*(l*sumvy-sumv*sumy)),((l*sumvv-sumv*sumv)*(l*sumyy-sumy*sumy)))
 	except:
 		SCC = float('nan')
 	return (ACC, MSE, SCC)
@@ -140,7 +143,7 @@ def svm_train(arg1, arg2=None, arg3=None):
 				raise ValueError('Wrong input format: sample_serial_number out of range')
 
 	if param.gamma == 0 and prob.n > 0: 
-		param.gamma = 1.0 / prob.n
+		param.gamma = old_div(1.0, prob.n)
 	libsvm.svm_set_print_string_function(param.print_func)
 	err_msg = libsvm.svm_check_parameter(prob, param)
 	if err_msg:

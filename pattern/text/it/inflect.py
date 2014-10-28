@@ -207,7 +207,7 @@ singular_majority_vote = [
     (  "lli",  "llo"  ), ( "ggi", "ggio"), ( "tri", "tro" ), ( "imi", "imo" )
 ]
 
-singular_irregular = dict((v, k) for k, v in plural_irregular.items())
+singular_irregular = dict((v, k) for k, v in list(plural_irregular.items()))
 
 def singularize(word, pos=NOUN, custom={}):
     """ Returns the singular of a given word.

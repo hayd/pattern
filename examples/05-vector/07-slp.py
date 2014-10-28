@@ -1,4 +1,8 @@
 from __future__ import print_function
+from __future__ import division
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 import os, sys; sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 import random
 
@@ -26,8 +30,8 @@ def corpus(path, encoding="utf-8"):
         with slash-encoded tokens (e.g., the/DT cat/NN).
     """
     for s in open(path, encoding=encoding):
-        s = map(lambda w:  w.split("/"), s.strip().split(" "))
-        s = map(lambda w: (w[0].replace("&slash;", "/"), w[1]), s)
+        s = [w.split("/") for w in s.strip().split(" ")]
+        s = [(w[0].replace("&slash;", "/"), w[1]) for w in s]
         yield s
 
 # The corpus is included in the Pattern download zip, in pattern/test/corpora:
@@ -58,13 +62,13 @@ for s in data:
         f[w][tag] += 1
 
 known, unknown = set(), set()
-for w, tags in f.items():
+for w, tags in list(f.items()):
     n = sum(tags.values()) # total count
     m = sorted(tags, key=tags.__getitem__, reverse=True)[0] # most frequent tag
-    if float(tags[m]) / n >= 0.97 and n > 1:
+    if old_div(float(tags[m]), n) >= 0.97 and n > 1:
         # Words that are always handled by the lexicon.
         known.add(w)
-    if float(tags[m]) / n <  0.92 and w in lexicon:
+    if old_div(float(tags[m]), n) <  0.92 and w in lexicon:
         # Words in the lexicon that should be ignored and handled by the model.
         unknown.add(w)
 
@@ -144,4 +148,4 @@ for s1 in data[-5000:]:
             i += 1
         n += 1
 
-print(float(i) / n) # accuracy
+print(old_div(float(i), n)) # accuracy

@@ -1,4 +1,8 @@
 from __future__ import absolute_import
+from __future__ import division
+from builtins import str
+from past.utils import old_div
+from builtins import object
 #### PATTERN | WORDNET #############################################################################
 # -*- coding: utf-8 -*-
 # Copyright (c) 2010 University of Antwerp, Belgium
@@ -71,13 +75,13 @@ def normalize(word):
     """ Normalizes the word for synsets() or Sentiwordnet[] by removing diacritics
         (PyWordNet does not take unicode).
     """
-    if not isinstance(word, basestring):
+    if not isinstance(word, str):
         word = str(word)
     if not isinstance(word, str):
         try: word = word.encode("utf-8", "ignore")
         except:
             pass
-    for k, v in DIACRITICS.items(): 
+    for k, v in list(DIACRITICS.items()): 
         for v in v: 
             word = word.replace(v, k)
     return word
@@ -120,16 +124,16 @@ class Synset(object):
         """
         if isinstance(synset, int):
             synset = wn.getSynset({NN: "n", VB: "v", JJ: "adj", RB: "adv"}[pos], synset)
-        if isinstance(synset, basestring):
+        if isinstance(synset, str):
             synset = synsets(synset, pos)[0]._synset
         self._synset = synset
 
     def __iter__(self):
-        for s in self._synset.getSenses(): yield unicode(s.form)
+        for s in self._synset.getSenses(): yield str(s.form)
     def __len__(self):
         return len(self._synset.getSenses())
     def __getitem__(self, i):
-        return unicode(self._synset.getSenses()[i].form)
+        return str(self._synset.getSenses()[i].form)
     def __eq__(self, synset):
         return isinstance(synset, Synset) and self.id == synset.id
     def __ne__(self, synset):
@@ -162,7 +166,7 @@ class Synset(object):
         """ Yields a list of word forms (i.e. synonyms), for example:
             synsets("TV")[0].synonyms => ["television", "telecasting", "TV", "video"]
         """
-        return [unicode(s.form) for s in self._synset.getSenses()]
+        return [str(s.form) for s in self._synset.getSenses()]
         
     senses = synonyms # Backwards compatibility; senses = list of Synsets for a word.
         
@@ -171,13 +175,13 @@ class Synset(object):
         """ Yields a descriptive string, for example:
             synsets("glass")[0].gloss => "a brittle transparent solid with irregular atomic structure".
         """
-        return unicode(self._synset.gloss)
+        return str(self._synset.gloss)
         
     @property
     def lexname(self):
         """ Yields a category, e.g., noun.animal.
         """
-        return self._synset.lexname and unicode(self._synset.lexname) or None
+        return self._synset.lexname and str(self._synset.lexname) or None
 
     @property
     def antonym(self):
@@ -336,7 +340,7 @@ def information_content(synset):
                 IC[pos][id] = w
             if w > IC_MAX:
                 IC_MAX = w
-    return IC.get(synset.pos, {}).get(synset.id, 0.0) / IC_MAX
+    return old_div(IC.get(synset.pos, {}).get(synset.id, 0.0), IC_MAX)
 
 ### WORDNET3 TO WORDNET2 ###########################################################################
 # Map WordNet3 synset id's to WordNet2 synset id's.

@@ -112,7 +112,7 @@ replacements = {
     # Same rule for Unicode apostrophe, see also Parser.find_tokens():
     ur"(l|c|d|j|m|n|qu|s|t|jusqu|lorsqu|puisqu)’": u"\\1&rsquo; "
 }
-replacements.update(((k.upper(), v.upper()) for k, v in replacements.items()))
+replacements.update(((k.upper(), v.upper()) for k, v in list(replacements.items())))
 
 def find_lemmata(tokens):
     """ Annotates the tokens with lemmata for plural nouns and conjugated verbs,
@@ -139,7 +139,7 @@ class Parser(_Parser):
         kwargs.setdefault("abbreviations", ABBREVIATIONS)
         kwargs.setdefault("replace", replacements)
         s = _Parser.find_tokens(self, tokens, **kwargs)
-        s = [s.replace("&rsquo ;", u"’") if isinstance(s, unicode) else s for s in s]
+        s = [s.replace("&rsquo ;", u"’") if isinstance(s, str) else s for s in s]
         return s
 
     def find_lemmata(self, tokens, **kwargs):
@@ -167,7 +167,7 @@ class Sentiment(_Sentiment):
                     w = w.replace(u"ê", "e")
                     w = w.replace(u"ï", "i")
                 if w != w0:
-                    for pos, (p, s, i) in pos.items():
+                    for pos, (p, s, i) in list(pos.items()):
                         self.annotate(w, pos, p, s, i)
 
 parser = Parser(

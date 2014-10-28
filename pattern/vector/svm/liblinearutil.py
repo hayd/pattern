@@ -2,6 +2,9 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+from __future__ import division
+from builtins import zip
+from past.utils import old_div
 import os, sys
 sys.path = [os.path.dirname(os.path.abspath(__file__))] + sys.path 
 from .liblinear import *
@@ -71,9 +74,9 @@ def evaluations(ty, pv):
 		sumvy += v*y
 	l = len(ty)
 	ACC = 100.0*total_correct/l
-	MSE = total_error/l
+	MSE = old_div(total_error,l)
 	try:
-		SCC = ((l*sumvy-sumv*sumy)*(l*sumvy-sumv*sumy))/((l*sumvv-sumv*sumv)*(l*sumyy-sumy*sumy))
+		SCC = old_div(((l*sumvy-sumv*sumy)*(l*sumvy-sumv*sumy)),((l*sumvv-sumv*sumv)*(l*sumyy-sumy*sumy)))
 	except:
 		SCC = float('nan')
 	return (ACC, MSE, SCC)

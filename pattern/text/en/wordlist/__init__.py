@@ -1,3 +1,4 @@
+from builtins import object
 #### PATTERN | VECTOR | WORDLIST ###################################################################
 # Copyright (c) 2010 University of Antwerp, Belgium
 # Author: Tom De Smedt <tom@organisms.be>
@@ -13,7 +14,7 @@ try:
 except:
     MODULE = ""
 
-class Wordlist:
+class Wordlist(object):
     
     def __init__(self, name, data=[]):
         """ Lazy read-only list of words.

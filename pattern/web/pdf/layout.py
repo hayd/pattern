@@ -1,5 +1,9 @@
 #!/usr/bin/env python2
 from __future__ import absolute_import
+from __future__ import division
+from builtins import range
+from past.utils import old_div
+from builtins import object
 import sys
 from .utils import INF, Plane, get_bound, uniq, csort, fsplit
 from .utils import bbox2str, matrix2str, apply_matrix_pt
@@ -218,7 +222,7 @@ class LTChar(LTComponent, LTText):
             width = font.get_width() * fontsize
             (vx,vy) = textdisp
             if vx is None:
-                vx = width/2
+                vx = old_div(width,2)
             else:
                 vx = vx * fontsize * .001
             vy = (1000 - vy) * fontsize * .001
@@ -583,9 +587,9 @@ class LTLayoutContainer(LTContainer):
             return objs.difference((obj1,obj2))
         # XXX this still takes O(n^2)  :(
         dists = []
-        for i in xrange(len(boxes)):
+        for i in range(len(boxes)):
             obj1 = boxes[i]
-            for j in xrange(i+1, len(boxes)):
+            for j in range(i+1, len(boxes)):
                 obj2 = boxes[j]
                 dists.append((0, dist(obj1, obj2), obj1, obj2))
         dists.sort()

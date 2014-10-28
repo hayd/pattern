@@ -59,6 +59,9 @@ the new state.::
         STARTED <-- STARTING
 
 """
+from builtins import map
+from builtins import range
+from builtins import object
 
 import atexit
 import os
@@ -97,7 +100,7 @@ class ChannelFailures(Exception):
         return self._exceptions[:]
 
     def __str__(self):
-        exception_strings = map(repr, self.get_instances())
+        exception_strings = list(map(repr, self.get_instances()))
         return self.delimiter.join(exception_strings)
 
     __repr__ = __str__

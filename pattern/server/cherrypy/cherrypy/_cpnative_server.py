@@ -1,4 +1,5 @@
 """Native adapter for serving CherryPy via its builtin server."""
+from builtins import str
 
 import logging
 import sys
@@ -32,7 +33,7 @@ class NativeGateway(wsgiserver.Gateway):
                 method = req.method
                 path = req.path
                 qs = req.qs or ""
-                headers = req.inheaders.items()
+                headers = list(req.inheaders.items())
                 rfile = req.rfile
                 prev = None
 

@@ -1,4 +1,7 @@
 from __future__ import print_function
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 # -*- coding: utf-8 -*-
 from util import *
 
@@ -20,29 +23,29 @@ class TestInflection(unittest.TestCase):
                 if fr.predicative(attr) == pred:
                     i +=1
                 n += 1
-        self.assertTrue(float(i) / n > 0.95)
+        self.assertTrue(old_div(float(i), n) > 0.95)
         print("pattern.fr.predicative()")
 
     def test_find_lemma(self):
         # Assert the accuracy of the verb lemmatization algorithm.
         i, n = 0, 0
-        for v1, v2 in fr.inflect.verbs.inflections.items():
+        for v1, v2 in list(fr.inflect.verbs.inflections.items()):
             if fr.inflect.verbs.find_lemma(v1) == v2: 
                 i += 1
             n += 1
-        self.assertTrue(float(i) / n > 0.80)
+        self.assertTrue(old_div(float(i), n) > 0.80)
         print("pattern.fr.inflect.verbs.find_lemma()")
         
     def test_find_lexeme(self):
         # Assert the accuracy of the verb conjugation algorithm.
         i, n = 0, 0
-        for v, lexeme1 in fr.inflect.verbs.infinitives.items():
+        for v, lexeme1 in list(fr.inflect.verbs.infinitives.items()):
             lexeme2 = fr.inflect.verbs.find_lexeme(v)
             for j in range(len(lexeme2)):
                 if lexeme1[j] == lexeme2[j]:
                     i += 1
                 n += 1
-        self.assertTrue(float(i) / n > 0.85)
+        self.assertTrue(old_div(float(i), n) > 0.85)
         print("pattern.fr.inflect.verbs.find_lexeme()")
 
     def test_conjugate(self):

@@ -1,12 +1,16 @@
 #!/usr/bin/env python2
 from __future__ import print_function
 from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 import sys
 import re
 try:
-    from cStringIO import StringIO
+    from io import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from io import StringIO
 from .cmapdb import CMapDB, CMap
 from .psparser import PSException, PSTypeError, PSEOF
 from .psparser import PSKeyword, literal_name, keyword_name
@@ -329,23 +333,23 @@ class PDFPageInterpreter(object):
                 return PDFColorSpace(name, len(list_value(spec[1])))
             else:
                 return PREDEFINED_COLORSPACE[name]
-        for (k,v) in dict_value(resources).iteritems():
+        for (k,v) in dict_value(resources).items():
             if 2 <= self.debug:
                 print('Resource: %r: %r' % (k,v), file=sys.stderr)
             if k == 'Font':
-                for (fontid,spec) in dict_value(v).iteritems():
+                for (fontid,spec) in dict_value(v).items():
                     objid = None
                     if isinstance(spec, PDFObjRef):
                         objid = spec.objid
                     spec = dict_value(spec)
                     self.fontmap[fontid] = self.rsrcmgr.get_font(objid, spec)
             elif k == 'ColorSpace':
-                for (csid,spec) in dict_value(v).iteritems():
+                for (csid,spec) in dict_value(v).items():
                     self.csmap[csid] = get_colorspace(resolve1(spec))
             elif k == 'ProcSet':
                 self.rsrcmgr.get_procset(list_value(v))
             elif k == 'XObject':
-                for (xobjid,xobjstrm) in dict_value(v).iteritems():
+                for (xobjid,xobjstrm) in dict_value(v).items():
                     self.xobjmap[xobjid] = xobjstrm
         return
 
@@ -364,7 +368,7 @@ class PDFPageInterpreter(object):
         # set some global states.
         self.scs = self.ncs = None
         if self.csmap:
-            self.scs = self.ncs = self.csmap.values()[0]
+            self.scs = self.ncs = list(self.csmap.values())[0]
         return
 
     def push(self, obj):

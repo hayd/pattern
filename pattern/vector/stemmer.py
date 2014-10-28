@@ -1,3 +1,4 @@
+from builtins import range
 ##### PATTERN | VECTOR | PORTER STEMMER ############################################################
 # Copyright (c) 2010 University of Antwerp, Belgium
 # Author: Tom De Smedt <tom@organisms.be>

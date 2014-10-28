@@ -1,4 +1,7 @@
 from __future__ import print_function
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 # -*- coding: utf-8 -*-
 from util import *
 
@@ -28,7 +31,7 @@ class TestInflection(unittest.TestCase):
                 if de.pluralize(sg) == pl:
                     i +=1
                 n += 1
-        self.assertTrue(float(i) / n > 0.69)
+        self.assertTrue(old_div(float(i), n) > 0.69)
         print("pattern.de.pluralize()")
         
     def test_singularize(self):
@@ -40,7 +43,7 @@ class TestInflection(unittest.TestCase):
                 if de.singularize(pl) == sg:
                     i +=1
                 n += 1
-        self.assertTrue(float(i) / n > 0.82)
+        self.assertTrue(old_div(float(i), n) > 0.82)
         print("pattern.de.singularize()")
 
     def test_attributive(self):
@@ -73,7 +76,7 @@ class TestInflection(unittest.TestCase):
                 if de.predicative(attr) == pred:
                     i +=1
                 n += 1
-        self.assertTrue(float(i) / n > 0.98)
+        self.assertTrue(old_div(float(i), n) > 0.98)
         print("pattern.de.predicative()")
 
     def test_find_lemma(self):
@@ -81,17 +84,17 @@ class TestInflection(unittest.TestCase):
         # Note: the accuracy is higher (88%) when measured on CELEX word forms
         # (presumably because de.inflect.verbs has high percentage irregular verbs).
         i, n = 0, 0
-        for v1, v2 in de.inflect.verbs.inflections.items():
+        for v1, v2 in list(de.inflect.verbs.inflections.items()):
             if de.inflect.verbs.find_lemma(v1) == v2: 
                 i += 1
             n += 1
-        self.assertTrue(float(i) / n > 0.86)
+        self.assertTrue(old_div(float(i), n) > 0.86)
         print("pattern.de.inflect.verbs.find_lemma()")
         
     def test_find_lexeme(self):
         # Assert the accuracy of the verb conjugation algorithm.
         i, n = 0, 0
-        for v, lexeme1 in de.inflect.verbs.infinitives.items():
+        for v, lexeme1 in list(de.inflect.verbs.infinitives.items()):
             lexeme2 = de.inflect.verbs.find_lexeme(v)
             for j in range(len(lexeme2)):
                 if lexeme1[j] == "":
@@ -99,7 +102,7 @@ class TestInflection(unittest.TestCase):
                 if lexeme1[j] == lexeme2[j]:
                     i += 1
                 n += 1
-        self.assertTrue(float(i) / n > 0.86)
+        self.assertTrue(old_div(float(i), n) > 0.86)
         print("pattern.de.inflect.verbs.find_lexeme()")
 
     def test_conjugate(self):
@@ -202,7 +205,7 @@ class TestParser(unittest.TestCase):
                 if s1[j][1] == s2[j][1]:
                     i += 1
                 n += 1
-        self.assertTrue(float(i) / n > 0.844)
+        self.assertTrue(old_div(float(i), n) > 0.844)
         print("pattern.de.parse()")
 
     def test_tag(self):

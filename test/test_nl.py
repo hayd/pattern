@@ -1,4 +1,7 @@
 from __future__ import print_function
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 # -*- coding: utf-8 -*-
 from util import *
 
@@ -21,7 +24,7 @@ class TestInflection(unittest.TestCase):
             if nl.pluralize(sg) == pl:
                 i +=1
             n += 1
-        self.assertTrue(float(i) / n > 0.74)
+        self.assertTrue(old_div(float(i), n) > 0.74)
         print("pattern.nl.pluralize()")
         
     def test_singularize(self):
@@ -32,7 +35,7 @@ class TestInflection(unittest.TestCase):
             if nl.singularize(pl) == sg:
                 i +=1
             n += 1
-        self.assertTrue(float(i) / n > 0.88)
+        self.assertTrue(old_div(float(i), n) > 0.88)
         print("pattern.nl.singularize()")
 
     def test_attributive(self):
@@ -43,7 +46,7 @@ class TestInflection(unittest.TestCase):
             if nl.attributive(pred) == attr:
                 i +=1
             n += 1
-        self.assertTrue(float(i) / n > 0.96)
+        self.assertTrue(old_div(float(i), n) > 0.96)
         print("pattern.nl.attributive()")
         
     def test_predicative(self):
@@ -54,7 +57,7 @@ class TestInflection(unittest.TestCase):
             if nl.predicative(attr) == pred:
                 i +=1
             n += 1
-        self.assertTrue(float(i) / n > 0.96)
+        self.assertTrue(old_div(float(i), n) > 0.96)
         print("pattern.nl.predicative()")
 
     def test_find_lemma(self):
@@ -62,17 +65,17 @@ class TestInflection(unittest.TestCase):
         # Note: the accuracy is higher (90%) when measured on CELEX word forms
         # (presumably because nl.inflect.verbs has high percentage irregular verbs).
         i, n = 0, 0
-        for v1, v2 in nl.inflect.verbs.inflections.items():
+        for v1, v2 in list(nl.inflect.verbs.inflections.items()):
             if nl.inflect.verbs.find_lemma(v1) == v2: 
                 i += 1
             n += 1
-        self.assertTrue(float(i) / n > 0.83)
+        self.assertTrue(old_div(float(i), n) > 0.83)
         print("pattern.nl.inflect.verbs.find_lemma()")
         
     def test_find_lexeme(self):
         # Assert the accuracy of the verb conjugation algorithm.
         i, n = 0, 0
-        for v, lexeme1 in nl.inflect.verbs.infinitives.items():
+        for v, lexeme1 in list(nl.inflect.verbs.infinitives.items()):
             lexeme2 = nl.inflect.verbs.find_lexeme(v)
             for j in range(len(lexeme2)):
                 if lexeme1[j] == lexeme2[j] or \
@@ -80,7 +83,7 @@ class TestInflection(unittest.TestCase):
                    lexeme1[j > 5 and 10 or 0] == lexeme2[j]:
                     i += 1
                 n += 1
-        self.assertTrue(float(i) / n > 0.79)
+        self.assertTrue(old_div(float(i), n) > 0.79)
         print("pattern.nl.inflect.verbs.find_lexeme()")
 
     def test_conjugate(self):
@@ -208,7 +211,7 @@ class TestParser(unittest.TestCase):
                 if s1[j][1] == s2[j][1]:
                     i += 1
                 n += 1
-        self.assertTrue(float(i) / n > 0.90)
+        self.assertTrue(old_div(float(i), n) > 0.90)
         print("pattern.nl.parser.parse()")
 
     def test_tag(self):

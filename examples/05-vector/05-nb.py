@@ -1,4 +1,6 @@
 from __future__ import print_function
+from __future__ import division
+from past.utils import old_div
 import os, sys; sys.path.insert(0, os.path.join("..", ".."))
 
 from pattern.vector import Document, Model, NB
@@ -23,7 +25,7 @@ m = Model(documents)
 
 print("number of documents:", len(m))
 print("number of words:", len(m.vector))
-print("number of words (average):", sum(len(d.features) for d in m.documents) / float(len(m)))
+print("number of words (average):", old_div(sum(len(d.features) for d in m.documents), float(len(m))))
 print()
 
 # Train Naive Bayes on all documents.

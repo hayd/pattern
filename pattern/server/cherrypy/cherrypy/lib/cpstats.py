@@ -181,6 +181,10 @@ To format statistics reports:
     See 'Reporting', above.
 
 """
+from __future__ import division
+from builtins import next
+from builtins import object
+from past.utils import old_div
 
 # -------------------------------- Statistics -------------------------------- #
 
@@ -212,14 +216,14 @@ appstats = logging.statistics.setdefault('CherryPy Applications', {})
 appstats.update({
     'Enabled': True,
     'Bytes Read/Request': lambda s: (s['Total Requests'] and
-        (s['Total Bytes Read'] / float(s['Total Requests'])) or 0.0),
-    'Bytes Read/Second': lambda s: s['Total Bytes Read'] / s['Uptime'](s),
+        (old_div(s['Total Bytes Read'], float(s['Total Requests']))) or 0.0),
+    'Bytes Read/Second': lambda s: old_div(s['Total Bytes Read'], s['Uptime'](s)),
     'Bytes Written/Request': lambda s: (s['Total Requests'] and
-        (s['Total Bytes Written'] / float(s['Total Requests'])) or 0.0),
-    'Bytes Written/Second': lambda s: s['Total Bytes Written'] / s['Uptime'](s),
+        (old_div(s['Total Bytes Written'], float(s['Total Requests']))) or 0.0),
+    'Bytes Written/Second': lambda s: old_div(s['Total Bytes Written'], s['Uptime'](s)),
     'Current Time': lambda s: time.time(),
     'Current Requests': 0,
-    'Requests/Second': lambda s: float(s['Total Requests']) / s['Uptime'](s),
+    'Requests/Second': lambda s: old_div(float(s['Total Requests']), s['Uptime'](s)),
     'Server Version': cherrypy.__version__,
     'Start Time': time.time(),
     'Total Bytes Read': 0,
@@ -269,13 +273,13 @@ class ByteCountWrapper(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         data = next(self.rfile)
         self.bytes_read += len(data)
         return data
 
 
-average_uriset_time = lambda s: s['Count'] and (s['Sum'] / s['Count']) or 0
+average_uriset_time = lambda s: s['Count'] and (old_div(s['Sum'], s['Count'])) or 0
 
 
 class StatsTool(cherrypy.Tool):
@@ -579,7 +583,7 @@ table.stats2 th {
         """Return ([headers], [rows]) for the given collection."""
         # E.g., the 'Requests' dict.
         headers = []
-        for record in v.itervalues():
+        for record in v.values():
             for k3 in record:
                 format = formatting.get(k3, missing)
                 if format is None:

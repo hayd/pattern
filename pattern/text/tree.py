@@ -1,3 +1,9 @@
+from builtins import filter
+from builtins import map
+from builtins import zip
+from builtins import str
+from builtins import range
+from builtins import object
 #### PATTERN | EN | PARSE TREE #####################################################################
 # Copyright (c) 2010 University of Antwerp, Belgium
 # Author: Tom De Smedt <tom@organisms.be>
@@ -33,7 +39,7 @@
 
 try:
     from itertools import chain
-    from itertools import izip
+    
 except:
     izip = zip  # Python 3
 
@@ -84,7 +90,7 @@ def zip(*args, **kwargs):
         from each of the argument sequences or iterables (or default if too short).
     """
     args = [list(iterable) for iterable in args]
-    n = max(map(len, args))
+    n = max(list(map(len, args)))
     v = kwargs.get("default", None)
     return _zip(*[i + [v] * (n - len(i)) for i in args])
 
@@ -134,7 +140,7 @@ class Word(object):
             - chunk: the chunk (or phrase) this word belongs to.
             - index: the index in the sentence.
         """
-        if not isinstance(string, unicode):
+        if not isinstance(string, str):
             try: string = string.decode("utf-8") # ensure Unicode
             except: 
                 pass
@@ -294,11 +300,11 @@ class Chunk(object):
         if not b1 and not b2:
             r = [(relation, role)]
         elif b1 and b2:
-            r = zip(relation, role)
+            r = list(zip(relation, role))
         elif b1:
-            r = zip(relation, [role] * len(relation))
+            r = list(zip(relation, [role] * len(relation)))
         elif b2:
-            r = zip([relation] * len(role), role)
+            r = list(zip([relation] * len(role), role))
         r = [(a, b) for a, b in r if a is not None or b is not None]
         self.sentence      = sentence
         self.words         = []
@@ -341,7 +347,7 @@ class Chunk(object):
         return self.words[-1].index + 1
     @property
     def range(self):
-        return range(self.start, self.stop)
+        return list(range(self.start, self.stop))
     @property
     def span(self):
         return (self.start, self.stop)
@@ -425,7 +431,7 @@ class Chunk(object):
             as in: "clawed/A1 at/P1 mice/P1-A2 in/P2 the/P2 wall/P2"
         """
         id = ""
-        f = lambda ch: filter(lambda k: self.sentence._anchors[k] == ch, self.sentence._anchors)
+        f = lambda ch: [k for k in self.sentence._anchors if self.sentence._anchors[k] == ch]
         if self.pnp and self.pnp.anchor:
             id += "-" + "-".join(f(self.pnp))
         if self.anchor:
@@ -582,7 +588,7 @@ def _is_tokenstring(string):
     # The class mbsp.TokenString stores the format of tags for each token.
     # Since it comes directly from MBSP.parse(), this format is always correct,
     # regardless of the given token format parameter for Sentence() or Text().
-    return isinstance(string, unicode) and hasattr(string, "tags")
+    return isinstance(string, str) and hasattr(string, "tags")
 
 class Sentence(object):
 
@@ -595,7 +601,7 @@ class Sentence(object):
         if _is_tokenstring(string):
             token, language = string.tags, getattr(string, "language", language)
         # Convert to Unicode.
-        if not isinstance(string, unicode):
+        if not isinstance(string, str):
             for encoding in (("utf-8",), ("windows-1252",), ("utf-8", "ignore")):
                 try: string = string.decode(*encoding)
                 except:
@@ -672,13 +678,13 @@ class Sentence(object):
 
     @property
     def subjects(self):
-        return self.relations["SBJ"].values()
+        return list(self.relations["SBJ"].values())
     @property
     def objects(self):
-        return self.relations["OBJ"].values()
+        return list(self.relations["OBJ"].values())
     @property
     def verbs(self):
-        return self.relations["VP"].values()
+        return list(self.relations["VP"].values())
         
     @property
     def anchors(self):
@@ -756,7 +762,7 @@ class Sentence(object):
         # Decode &slash; characters (usually in words and lemmata).
         # Assume None for missing tags (except the word itself, which defaults to an empty string).
         custom = {}
-        for k, v in izip(tags, token.split("/")):
+        for k, v in zip(tags, token.split("/")):
             if SLASH0 in v:
                 v = v.replace(SLASH, "/")
             if k == "pos":
@@ -974,7 +980,7 @@ class Sentence(object):
         match = lambda a, b: a.endswith("*") and b.startswith(a[:-1]) or a==b
         indices = []
         for i in range(len(self.words)):
-            if match(value, unicode(self.get(i, tag))):
+            if match(value, str(self.get(i, tag))):
                 indices.append(i)
         return indices
 
@@ -1125,7 +1131,7 @@ class Text(list):
             token, language = string.tags, getattr(string, "language", language)
         if string:
             # From a string.
-            if isinstance(string, basestring):
+            if isinstance(string, str):
                 string = string.splitlines()
             # From an iterable (e.g., string.splitlines(), open('parsed.txt')).
             self.extend(Sentence(s, token, language) for s in string)
@@ -1361,8 +1367,8 @@ def parse_xml(sentence, tab="\t", id=""):
             XML_WORD,
             word.type and ' %s="%s"' % (XML_TYPE, xml_encode(word.type)) or '',
             word.lemma and ' %s="%s"' % (XML_LEMMA, xml_encode(word.lemma)) or '',
-            (" "+" ".join(['%s="%s"' % (k,v) for k,v in word.custom_tags.items() if v != None])).rstrip(),
-            xml_encode(unicode(word)),
+            (" "+" ".join(['%s="%s"' % (k,v) for k,v in list(word.custom_tags.items()) if v != None])).rstrip(),
+            xml_encode(str(word)),
             XML_WORD
         ))
         if not chunk:
@@ -1423,11 +1429,11 @@ _attachments = {} # {u'A1': [[[u'with', u'IN', u'B-PP', 'B-PNP', u'PP', 'O', u'w
 
 # This is a fallback if for some reason we fail to import MBSP.TokenString,
 # e.g., when tree.py is part of another project.
-class TaggedString(unicode):
+class TaggedString(str):
     def __new__(cls, string, tags=["word"], language="en"):
-        if isinstance(string, unicode) and hasattr(string, "tags"): 
+        if isinstance(string, str) and hasattr(string, "tags"): 
             tags, language = string.tags, getattr(string, "language", language)
-        s = unicode.__new__(cls, string)
+        s = str.__new__(cls, string)
         s.tags = list(tags)
         s.language = language
         return s
@@ -1448,7 +1454,7 @@ def parse_string(xml):
         # This information is returned in TokenString.tags,
         # so the format and order of the token tags is retained when exporting/importing as XML.
         format = sentence.get(XML_TOKEN, [WORD, POS, CHUNK, PNP, REL, ANCHOR, LEMMA])
-        format = not isinstance(format, basestring) and format or format.replace(" ","").split(",")
+        format = not isinstance(format, str) and format or format.replace(" ","").split(",")
         # Traverse all <chunk> and <chink> elements in the sentence.
         # Find the <word> elements inside and create tokens.
         tokens = []
@@ -1513,7 +1519,7 @@ def _parse_tokens(chunk, format=[WORD, POS, CHUNK, PNP, REL, ANCHOR, LEMMA]):
     relation = _parse_relation(chunk, type)
     # Process all of the <word> elements in the chunk, for example:
     # <word type="NN" lemma="pizza">pizza</word> => [pizza, NN, I-NP, O, NP-OBJ-1, O, pizza]
-    for word in filter(lambda n: n.tag == XML_WORD, chunk):
+    for word in [n for n in chunk if n.tag == XML_WORD]:
         tokens.append(_parse_token(word, chunk=type, relation=relation, format=format))
     # Add the IOB chunk tags:
     # words at the start of a chunk are marked with B-, words inside with I-.

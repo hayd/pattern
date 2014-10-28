@@ -54,6 +54,7 @@ resides in the global site-package this won't be needed.
 
 Then restart apache2 and access http://127.0.0.1:8080
 """
+from builtins import object
 
 import logging
 import sys
@@ -122,7 +123,7 @@ def setup(req):
         req.server.register_cleanup(req, cherrypy_cleanup)
 
 
-class _ReadOnlyRequest:
+class _ReadOnlyRequest(object):
     expose = ('read', 'readline', 'readlines')
     def __init__(self, req):
         for method in self.expose:
@@ -253,7 +254,7 @@ def send_response(req, status, headers, body, stream=False):
         req.flush()
 
     # Set response body
-    if isinstance(body, basestring):
+    if isinstance(body, str):
         req.write(body)
     else:
         for seg in body:

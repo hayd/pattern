@@ -1,4 +1,8 @@
 from __future__ import print_function
+from __future__ import division
+from builtins import range
+from past.utils import old_div
+from builtins import object
 # -*- coding: utf-8 -*-
 from util import *
 
@@ -14,7 +18,7 @@ class TestUtilityFunctions(unittest.TestCase):
 
     def test_deepcopy(self):
         # Object with a copy() method are responsible for deep-copying themselves.
-        class MyObject:
+        class MyObject(object):
             def __init__(self, i):
                 self.i = i
             def copy(self):
@@ -154,7 +158,7 @@ class TestGraph(unittest.TestCase):
         self.assertTrue(len(g.nodes)  == 3)
         self.assertTrue(len(g.edges)  == 2)
         self.assertTrue(g.distance    == 10.0)
-        self.assertTrue(g.density     == 2 / 3.0)
+        self.assertTrue(g.density     == old_div(2, 3.0))
         self.assertTrue(g.is_complete == False)
         self.assertTrue(g.is_sparse   == False)
         self.assertTrue(g.is_dense    == True)
@@ -455,7 +459,7 @@ class TestGraphTraversal(unittest.TestCase):
             graph.adjacency(self.g, heuristic=lambda id1, id2: 0.1),
         ]
         for i in range(len(a)):
-            a[i] = sorted((id1, sorted((id2, round(w,2)) for id2, w in p.items())) for id1, p in a[i].items())
+            a[i] = sorted((id1, sorted((id2, round(w,2)) for id2, w in list(p.items()))) for id1, p in list(a[i].items()))
         self.assertEqual(a[0], [
             ("a", [("b", 0.75), ("c", 1.0)]), 
             ("b", [("a", 0.75), ("d", 1.0)]), 
@@ -542,7 +546,7 @@ class TestGraphTraversal(unittest.TestCase):
     def test_floyd_warshall_all_pairs_distance(self):
         # Assert all pairs path distance.
         p1 = graph.floyd_warshall_all_pairs_distance(self.g)
-        p2 = sorted((id1, sorted((id2, round(w,2)) for id2, w in p.items())) for id1, p in p1.items())
+        p2 = sorted((id1, sorted((id2, round(w,2)) for id2, w in list(p.items()))) for id1, p in list(p1.items()))
         self.assertEqual(p2, [
             ("a", [("a", 0.00), ("b", 0.75), ("c", 1.00), ("d", 1.75), ("e", 2.75)]), 
             ("b", [("a", 0.75), ("b", 0.00), ("c", 1.75), ("d", 1.00), ("e", 2.00)]), 

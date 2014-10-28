@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 # This file is part of CherryPy <http://www.cherrypy.org/>
 # -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:expandtab:fileencoding=utf-8

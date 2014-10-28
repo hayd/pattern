@@ -1,3 +1,7 @@
+from __future__ import division
+from builtins import str
+from builtins import range
+from past.utils import old_div
 #### PATTERN | EN | QUANTIFY #######################################################################
 # Copyright (c) 2010 University of Antwerp, Belgium
 # Author: Tom De Smedt <tom@organisms.be>
@@ -42,7 +46,7 @@ NUMERALS = {
     "nine"  :  9,    "nineteen"  : 19
 }
 
-NUMERALS_INVERSE = dict((i, w) for w, i in NUMERALS.items()) # 0 => "zero"
+NUMERALS_INVERSE = dict((i, w) for w, i in list(NUMERALS.items())) # 0 => "zero"
 NUMERALS_VERBOSE = {
     "half"  : ( 1, 0.5),
     "dozen" : (12, 0.0),
@@ -169,7 +173,7 @@ def numerals(n, round=2):
         numerals(2.249) => two point twenty-five
         numerals(2.249, round=3) => two point two hundred and forty-nine
     """
-    if isinstance(n, basestring):
+    if isinstance(n, str):
         if n.isdigit():
             n = int(n)
         else:
@@ -182,7 +186,7 @@ def numerals(n, round=2):
         return "%s %s" % (MINUS, numerals(abs(n)))
     # Split the number into integral and fractional part.
     # Converting the integral part to a long ensures a better accuracy during the recursion.
-    i = long(n//1)
+    i = int(n//1)
     f = n-i
     # The remainder, which we will stringify in recursion.
     r = 0
@@ -207,8 +211,8 @@ def numerals(n, round=2):
         while o > len(ORDER)-1:
             s += " "+ORDER[-1] # This occurs for consecutive thousands: million vigintillion.
             o -= len(ORDER)-1
-        s = "%s %s%s" % (numerals(i//(base/1000)), (o>1 and ORDER[o-1] or ""), s)
-        r = i % (base/1000)
+        s = "%s %s%s" % (numerals(i//(old_div(base,1000))), (o>1 and ORDER[o-1] or ""), s)
+        r = i % (old_div(base,1000))
     if f != 0: 
         # Map the fractional part: "two point twenty-five" => 2.25.
         # We cast it to a string first to find all the leading zeros.
@@ -218,7 +222,7 @@ def numerals(n, round=2):
         f = ("%." + str(round is None and 2 or round) + "f") % f
         f = f.replace("0.","",1).rstrip("0")
         f, z = zshift(f)
-        f = f and " %s%s %s" % (RADIX, " %s"%ZERO*z, numerals(long(f))) or ""
+        f = f and " %s%s %s" % (RADIX, " %s"%ZERO*z, numerals(int(f))) or ""
     else:
         f = ""
     if r == 0:
@@ -276,7 +280,7 @@ def approximate(word, amount=1, plural={}):
     if amount > 10000000:
         return "%s %s" % (COUNTLESS, p)
     # Hundreds and thousands.
-    thousands = int(log(amount, 10) / 3)
+    thousands = int(old_div(log(amount, 10), 3))
     hundreds  = ceil(log(amount, 10) % 3) - 1
     h = hundreds==2 and "hundreds of " or (hundreds==1 and "tens of " or "")
     t = thousands>0 and pluralize(ORDER[thousands])+" of " or ""
@@ -305,9 +309,9 @@ def count(*args, **kwargs):
     """ Returns an approximation of the entire set.
         Identical words are grouped and counted and then quantified with an approximation.
     """
-    if len(args) == 2 and isinstance(args[0], basestring):
+    if len(args) == 2 and isinstance(args[0], str):
         return approximate(args[0], args[1], kwargs.get("plural", {}))
-    if len(args) == 1 and isinstance(args[0], basestring) and "amount" in kwargs:
+    if len(args) == 1 and isinstance(args[0], str) and "amount" in kwargs:
         return approximate(args[0], kwargs["amount"], kwargs.get("plural", {}))
     if len(args) == 1 and isinstance(args[0], dict):
         count = args[0]
@@ -377,7 +381,7 @@ def reflect(object, quantify=True, replace=readable_types):
             types.append(_type(object))
         # Classes and modules.
         else:
-            for v in object.__dict__.values():
+            for v in list(object.__dict__.values()):
                 try: types.append(str(v.__classname__))
                 except:
                     # Not a class after all (some stuff like ufunc in Numeric).
@@ -388,7 +392,7 @@ def reflect(object, quantify=True, replace=readable_types):
     # Dictionaries have keys pointing to objects.
     elif isinstance(object, dict):
         types += [_type(k) for k in object]
-        types += [_type(v) for v in object.values()]
+        types += [_type(v) for v in list(object.values())]
     else:
         types.append(_type(object))
     # Clean up type strings.

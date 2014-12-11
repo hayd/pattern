@@ -102,6 +102,8 @@ def decode_string(v, encoding="utf-8"):
     return unicode(v)
 
 
+# TODO use one of these (rather than copy and paste in each file)
+# ... if we really have to use any at all
 def encode_string(v, encoding="utf-8"):
     """Returns the given value as a Python byte string (if possible)."""
     if isinstance(encoding, basestring):
@@ -113,7 +115,12 @@ def encode_string(v, encoding="utf-8"):
             except:
                 pass
         return v
-    return str(v)
+    if isinstance(v, bytes):
+        return v
+    else:
+        # TODO Is this ever the correct behaviour (see coverage)
+        raise ValueError()
+        #return str(v)
 
 decode_utf8 = decode_string
 encode_utf8 = encode_string
@@ -3478,10 +3485,17 @@ class SVM(Classifier):
         H2 = dict((w, i + 1) for i, w in enumerate(self.classes))
         # Class reversed hash.
         H3 = dict((i + 1, w) for i, w in enumerate(self.classes))
+
         # Hashed vectors.
-        x = map(lambda v: dict(map(lambda k: (H1[k], v[k]), v)), M)
+        x = list(map(lambda v: dict(map(lambda k: (H1[k], v[k]), v)), M))
+        # TODO use this more efficient version?
+        # x = [dict(((H1[k], v[k]), v) for k in v) for v in M]
+
         # Hashed classes.
-        y = map(lambda v: H2[v[0]], self._vectors)
+        y = list(map(lambda v: H2[v[0]], self._vectors))
+        # TODO use this more efficient version?
+        # y = [H2[v[0]] for v in self._vectors]
+
         # For linear SVC, use LIBLINEAR which is faster.
         # For kernel SVC, use LIBSVM.
         if self.extension == LIBLINEAR:

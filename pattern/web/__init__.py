@@ -189,7 +189,6 @@ def encode_string(v, encoding="utf-8"):
     """Returns the given value as a Python byte string (if possible)."""
     if isinstance(encoding, basestring):
         encoding = ((encoding,),) + (("windows-1252",), ("utf-8", "ignore"))
-    if isinstance(v, unicode):
         for e in encoding:
             try:
                 return v.encode(*e)
@@ -698,7 +697,7 @@ class URL(object):
         return self.__dict__["_redirect"] or None
 
     def __str__(self):
-        return bytestring(self.string)
+        return self._string
 
     def __unicode__(self):
         # The string representation includes the query attributes with HTTP
